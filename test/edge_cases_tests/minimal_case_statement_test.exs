@@ -18,113 +18,125 @@ defmodule EdgeCases.MinimalCaseStatementTest do
   alias Support.EdgeCases.CaseStatement
 
   @file_module_mappings %{
-    CaseStatement.Minimal => "minimal",
+    CaseStatement.Minimal => "minimal"
   }
 
   describe "Minimal Case Statement: " do
     setup do
-      ExDebugger.Repo.reset
+      ExDebugger.Repo.reset()
 
       :ok
     end
 
-    test ".being_piped_inside_contracted_def_form" do
+    @tag input: :ok
+    test ".being_piped_inside_contracted_def_form", ctx do
       CaseStatement.Minimal
-      |> run_and_assert_match(:being_piped_inside_contracted_def_form, [
-        {6, "It was ok", bindings: [input: :ok]},
-        {8, "It was ok", bindings: [input: :ok]}
+      |> run_and_assert_match(:being_piped_inside_contracted_def_form, ctx.input, [
+        {8, "It was ok", :case_statement, bindings: [input: :ok]},
+        {10, "It was ok", :def_output_only, bindings: [input: :ok]}
       ])
     end
 
     test ".as_a_single_vanilla_statement_inside_expanded_def_form" do
       CaseStatement.Minimal
-      |> run_and_assert_match(:as_a_single_vanilla_statement_inside_expanded_def_form, [
-        {13, "It was error", bindings: [input: :error]},
-        {14, "It was error", bindings: [input: :error]}
+      |> run_and_assert_match(:as_a_single_vanilla_statement_inside_expanded_def_form, :error, [
+        {15, "It was error", :case_statement, bindings: [input: :error]},
+        {17, "It was error", :def_output_only, bindings: [input: :error]}
       ])
     end
 
     test ".as_a_long_single_vanilla_statement" do
+      last_line = 27
+
       [
         [
-          {19, :ok, "it was ok", bindings: [input: :ok]},
-          {24, :ok, "it was ok", bindings: [input: :ok]},
+          {21, "It was ok", :case_statement, bindings: [input: :ok, r: :ok]},
+          {last_line, "It was ok", :def_output_only, bindings: [input: :ok]}
         ],
         [
-          {20, :error, "it was error", bindings: [input: :error]},
-          {24, :error, "it was error", bindings: [input: :error]},
+          {22, "It was error", :case_statement, bindings: [input: :error, r: :error]},
+          {last_line, "It was error", :def_output_only, bindings: [input: :error]}
         ],
         [
-          {21, 1, "it was 1", bindings: [input: 1]},
-          {24, 1, "it was 1", bindings: [input: 1]},
+          {23, "It was 1", :case_statement, bindings: [input: 1, r: 1]},
+          {last_line, "It was 1", :def_output_only, bindings: [input: 1]}
         ],
         [
-          {22, 2, "it was 2", bindings: [input: 2]},
-          {24, 2, "it was 2", bindings: [input: 2]},
+          {24, "It was 2", :case_statement, bindings: [input: 2, r: 2]},
+          {last_line, "It was 2", :def_output_only, bindings: [input: 2]}
         ],
         [
-          {23, 3, "it was 3", bindings: [input: 3]},
-          {24, 3, "it was 3", bindings: [input: 3]},
-        ],
+          {25, "It was 3", :case_statement, bindings: [input: 3, r: 3]},
+          {last_line, "It was 3", :def_output_only, bindings: [input: 3]}
+        ]
       ]
-      |> Enum.each(fn expectations ->
-        run_and_assert_match(CaseStatement.Minimal, :as_a_single_vanilla_statement_inside_expanded_def_form, expectations)
-        ExDebugger.Repo.reset
+      |> Enum.each(fn expectations = [{_, _, _, bindings: [{:input, input} | _]} | _] ->
+        run_and_assert_match(
+          CaseStatement.Minimal,
+          :as_a_long_single_vanilla_statement,
+          input,
+          expectations
+        )
+
+        ExDebugger.Repo.reset()
       end)
     end
   end
 
-  def run_and_assert_match(module, fun, line, piped_value, bindings \\ [])
-  def run_and_assert_match(module, fun, line, piped_value, bindings: bindings) do
-    run_and_assert_match(module, fun, line, piped_value, bindings)
-  end
-  def run_and_assert_match(module, fun, expectations) do
+  def run_and_assert_match(module, fun, input, expectations) do
     file_name = Map.fetch!(@file_module_mappings, module)
 
-    expectations
-    |> Enum.zip(ExDebugger.Repo.dump)
-    |> Enum.each(fn {{line, piped_value, bindings}, {_, _, dump}} ->
-      apply(
-        module,
-        fun,
-        bindings
-        |> Enum.reduce([], fn
-          e, a when is_map(e) -> e = e
-            |> Enum.reduce(%{}, fn {k, v}, a -> v
-              |> case do
-                {_, v} -> Map.put(a, k, v)
-                vs when is_list(vs) -> Map.put(a, k, vs)
-              end
-            end)
-            a ++ [e]
+    file =
+      "/Users/kevinjohnson/projects/ex_debugger/test/support/edge_cases/case_statement/#{
+        file_name
+      }.ex"
 
-          {_, v}, a -> a ++ [v]
-          e, a -> a ++ [e]
-        end)
-      )
+    input = List.wrap(input)
+    function = "&#{fun}/#{Enum.count(input)}"
+    apply(module, fun, input)
 
-      assert %{
-        bindings: bindings
-          |> Enum.reduce([], fn
-            e, a when is_map(e) -> e = e
-              |> Map.values
-              |> case do
-                e = [{_, _}] -> e
-                e when is_list(e) -> e
-              end
-              a ++ e
-            e = {_, v}, a when is_map(v) -> a ++ [e]
-            e, a -> a ++ [e]
-          end),
-        env: %{
-          file: "/Users/kevinjohnson/projects/ex_debugger/test/support/edge_cases/case_statement/#{file_name}.ex",
-          function: "&#{fun}/#{Enum.count(bindings)}",
-          line: line,
-          module: module
-        },
-        label: :def_output_only,
-        piped_value: piped_value
-      } == dump
+    expected =
+      expectations
+      |> Enum.map(fn {line, piped_value, label, bindings: bindings} ->
+        %{
+          bindings: bindings(bindings),
+          env: %{
+            file: file,
+            function: function,
+            line: line,
+            module: module
+          },
+          label: label,
+          piped_value: piped_value
+        }
+      end)
+
+    actual =
+      ExDebugger.Repo.dump()
+      |> Enum.map(&elem(&1, 2))
+
+    assert expected == actual
+  end
+
+  def bindings(bindings) do
+    bindings
+    |> Enum.reduce([], fn
+      e, a when is_map(e) ->
+        e =
+          e
+          |> Map.values()
+          |> case do
+            e = [{_, _}] -> e
+            e when is_list(e) -> e
+          end
+
+        a ++ e
+
+      e = {_, v}, a when is_map(v) ->
+        a ++ [e]
+
+      e, a ->
+        a ++ [e]
     end)
   end
 end

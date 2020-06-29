@@ -4,14 +4,17 @@ defmodule ExDebugger.Tokenizer.Repo do
 
   def new do
     __MODULE__
-    |> :ets.info
+    |> :ets.info()
     |> case do
-      :undefined -> try do
+      :undefined ->
+        try do
           :ets.new(__MODULE__, @opts)
         rescue
           _ -> new()
         end
-      _ -> :already_created
+
+      _ ->
+        :already_created
     end
   end
 
@@ -26,11 +29,14 @@ defmodule ExDebugger.Tokenizer.Repo do
 
   def is_uninitialized?(key) do
     __MODULE__
-    |> :ets.info
+    |> :ets.info()
     |> case do
-      :undefined -> new()
+      :undefined ->
+        new()
         :not_found
-      _ -> lookup(key)
+
+      _ ->
+        lookup(key)
     end
     |> case do
       :not_found -> true
@@ -40,7 +46,7 @@ defmodule ExDebugger.Tokenizer.Repo do
 
   def insert(value, key) do
     __MODULE__
-    |> :ets.info
+    |> :ets.info()
     |> case do
       :undefined -> new()
       _ -> :ok

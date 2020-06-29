@@ -1,11 +1,13 @@
 defmodule Support.EdgeCases.CaseStatement.Minimal do
   use ExDebugger
 
-  def being_piped_inside_contracted_def_form(input), do: (input
-    |> case do
-      :ok -> "It was ok"
-      :error -> "It was error"
-    end)
+  def being_piped_inside_contracted_def_form(input),
+    do:
+      input
+      |> (case do
+            :ok -> "It was ok"
+            :error -> "It was error"
+          end)
 
   def as_a_single_vanilla_statement_inside_expanded_def_form(input) do
     case input do

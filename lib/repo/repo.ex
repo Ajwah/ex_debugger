@@ -6,13 +6,17 @@ defmodule ExDebugger.Repo do
   @counter_id 1
 
   def new, do: new(:counters.new(@max_counter, []))
+
   def new(counters) do
     __MODULE__
-    |> :ets.info
+    |> :ets.info()
     |> case do
-      :undefined -> :ets.new(__MODULE__, @opts)
+      :undefined ->
+        :ets.new(__MODULE__, @opts)
         :persistent_term.put(@persistent_term_key, counters)
-      _ -> :already_created
+
+      _ ->
+        :already_created
     end
   end
 
@@ -33,13 +37,14 @@ defmodule ExDebugger.Repo do
 
   def insert(value) do
     __MODULE__
-    |> :ets.info
+    |> :ets.info()
     |> case do
       :undefined -> new()
       _ -> :ok
     end
 
     :counters.add(counter_ref(), @counter_id, 1)
+
     :ets.insert(
       __MODULE__,
       {:counters.get(counter_ref(), @counter_id), :erlang.system_time(:nanosecond), value}
@@ -48,7 +53,7 @@ defmodule ExDebugger.Repo do
 
   def reset do
     __MODULE__
-    |> :ets.info
+    |> :ets.info()
     |> case do
       :undefined -> new()
       _ -> :ok

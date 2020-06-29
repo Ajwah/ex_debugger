@@ -13,10 +13,12 @@ defmodule ExDebugger.Tokenizer.NestedModule do
   def usage_ex_debugger(tokens) do
     usage_ex_debugger(tokens, %{ls: [], module_name: nil})
   end
+
   def usage_ex_debugger([{:identifier, _, :defmodule} | tl], acc) do
     {module_name, remainder} = name(tl)
     usage_ex_debugger(remainder, %{module_name: module_name, ls: acc.ls})
   end
+
   def usage_ex_debugger([{:identifier, _, :use}, {:alias, _, :ExDebugger} | tl], acc) do
     usage_ex_debugger(tl, %{module_name: nil, ls: [acc.module_name | acc.ls]})
   end
@@ -24,22 +26,23 @@ defmodule ExDebugger.Tokenizer.NestedModule do
   def usage_ex_debugger([_ | tl], acc), do: usage_ex_debugger(tl, acc)
   def usage_ex_debugger([], %{ls: ls}), do: ls
 
-# ) do
+  # ) do
 
-#     tokens
-#     |> Enum.drop_while(fn
-#       {:identifier, {3, 3, nil}, :use},
-#       {:identifier, _, :defmodule} -> false
-#       _ -> true
-#     end)
-#   end
+  #     tokens
+  #     |> Enum.drop_while(fn
+  #       {:identifier, {3, 3, nil}, :use},
+  #       {:identifier, _, :defmodule} -> false
+  #       _ -> true
+  #     end)
+  #   end
 
   def name(ls) when is_list(ls) do
     {acc, tl} = name(ls, [])
+
     {
       acc
-      |> Enum.reverse
-      |> Module.concat,
+      |> Enum.reverse()
+      |> Module.concat(),
       tl
     }
   end

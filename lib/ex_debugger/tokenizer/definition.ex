@@ -7,9 +7,14 @@ defmodule ExDebugger.Tokenizer.Definition do
       {:identifier, _, :def} -> false
       _ -> true
     end)
-    |> Enum.chunk_while({:none, []}, fn
-        e = {:identifier, {_, def_indentation_level, _}, :def}, {i, acc} -> {:cont, normalize(acc, i), {def_indentation_level, [e]}}
-        e, {def_indentation_level, acc} -> {:cont, {def_indentation_level, [e | acc]}}
+    |> Enum.chunk_while(
+      {:none, []},
+      fn
+        e = {:identifier, {_, def_indentation_level, _}, :def}, {i, acc} ->
+          {:cont, normalize(acc, i), {def_indentation_level, [e]}}
+
+        e, {def_indentation_level, acc} ->
+          {:cont, {def_indentation_level, [e | acc]}}
       end,
       fn
         [] -> {:cont, []}
@@ -21,28 +26,40 @@ defmodule ExDebugger.Tokenizer.Definition do
 
   def normalize(tokens, def_indentation_level) do
     tokens
-    |> trim_beyond_end
-    |> Enum.reverse
+    |> trim_beyond_end(def_indentation_level)
+    |> Enum.reverse()
     |> strip_wrong_indentations(def_indentation_level)
     |> trim_ending(def_indentation_level)
-    |> Enum.reverse
+    |> Enum.reverse()
   end
 
   def strip_wrong_indentations([], _), do: []
   def strip_wrong_indentations(ls = [_], _), do: ls
+
   def strip_wrong_indentations([{:identifier, _, :def} | _] = tokens, def_indentation_level) do
     tokens
     |> Enum.reduce({:include, []}, fn
-      e = {:identifier, {_, _, _}, :def}, {_, a} -> {:include, [e | a]}
-      e = {:end, {_, _, _}}, {_, a} -> {:include, [e | a]}
-      _ = {:eol, {_, _, _}}, {_, a} -> {:include, a}
-      _, {:exclude, a} -> {:exclude, a}
-      e = {_, {_, indentation_level, _}, _}, {:include, a} -> if indentation_level > def_indentation_level do
+      e = {:identifier, {_, _, _}, :def}, {_, a} ->
+        {:include, [e | a]}
+
+      e = {:end, {_, _, _}}, {_, a} ->
+        {:include, [e | a]}
+
+      _ = {:eol, {_, _, _}}, {_, a} ->
+        {:include, a}
+
+      _, {:exclude, a} ->
+        {:exclude, a}
+
+      e = {_, {_, indentation_level, _}, _}, {:include, a} ->
+        if indentation_level > def_indentation_level do
           {:include, [e | a]}
         else
           {:exclude, a}
         end
-      e = {_, {_, indentation_level, _}}, {:include, a} -> if indentation_level > def_indentation_level do
+
+      e = {_, {_, indentation_level, _}}, {:include, a} ->
+        if indentation_level > def_indentation_level do
           {:include, [e | a]}
         else
           {:exclude, a}
@@ -51,27 +68,57 @@ defmodule ExDebugger.Tokenizer.Definition do
     |> elem(1)
   end
 
-  def trim_beyond_end([]), do: []
-  def trim_beyond_end(tokens) do
-    tokens
+  def trim_beyond_end([], _), do: []
+
+  def trim_beyond_end(tokens, def_indentation_level) do
+    result_so_far =
+      tokens
+      |> Enum.drop_while(fn
+        {:end, _} -> false
+        _ -> true
+      end)
+      |> case do
+        [] -> convert_eol_to_end(tokens, def_indentation_level)
+        r -> r
+      end
+
+    result_so_far
     |> Enum.drop_while(fn
-      {:end, _} -> false
+      {:end, {_, ^def_indentation_level, _}} -> false
       _ -> true
     end)
     |> case do
-      [] -> convert_eol_to_end(tokens)
-      [{:end, _}, _, def_ending = {:end, _} | tl] -> [def_ending | tl]
+      [] -> result_so_far
       r -> r
     end
   end
 
-  def convert_eol_to_end([{:eol, {x, y, _}} | tl]), do: [{:end, {x, y, nil}} | tl]
+  def convert_eol_to_end([{:eol, {x, _, _}} | tl], def_indentation_level),
+    do: [{:end, {x, def_indentation_level, :missing_end}} | tl]
+
   def trim_ending(ls = [], _), do: ls
   def trim_ending(ls = [_], _), do: ls
   def trim_ending(ls = [_, _], _), do: ls
 
-  def trim_ending([{:end, {_, _, _}}, last_line = {_, {x, _, _}} | tl], def_indentation_level), do: [{:end, {x + 1, def_indentation_level, nil}}, last_line | tl]
-  def trim_ending([{:end, {_, _, _}}, last_line = {_, {x, _, _}, _} | tl], def_indentation_level), do: [{:end, {x + 1, def_indentation_level, nil}}, last_line | tl]
+  def trim_ending(
+        [end_token = {:end, {_, _, _}}, last_line = {_, {lx, _, _}} | tl],
+        def_indentation_level
+      ),
+      do: trim_ending(lx, end_token, def_indentation_level, last_line, tl)
+
+  def trim_ending(
+        [end_token = {:end, {_, _, _}}, last_line = {_, {lx, _, _}, _} | tl],
+        def_indentation_level
+      ),
+      do: trim_ending(lx, end_token, def_indentation_level, last_line, tl)
+
+  def trim_ending(lx, {:end, {x, y, tag}}, def_indentation_level, last_line, tl) do
+    if tag == :missing_end do
+      [{:end, {x, y, nil}}, last_line | tl]
+    else
+      [{:end, {lx + 1, def_indentation_level, nil}}, last_line | tl]
+    end
+  end
 end
 
 # q = [

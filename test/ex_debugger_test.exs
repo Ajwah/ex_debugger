@@ -24,7 +24,7 @@ defmodule ExDebuggerTest do
 
   describe "Handles Case Statements:" do
     setup do
-      ExDebugger.Repo.reset
+      ExDebugger.Repo.reset()
 
       :ok
     end
@@ -262,7 +262,8 @@ defmodule ExDebuggerTest do
     # end
 
     def assert_events_match_repo(expected) do
-      events = ExDebugger.Repo.dump
+      events =
+        ExDebugger.Repo.dump()
         |> Enum.map(&elem(&1, 2))
 
       assert Enum.count(expected) == Enum.count(events)
@@ -284,11 +285,11 @@ defmodule ExDebuggerTest do
         current_event
       end)
     end
-
   end
 
   def assert_capture_io(expected, fun) when is_function(fun) do
-    actual = fun
+    actual =
+      fun
       |> capture_io
       |> strip_ansi_escape_codes
 

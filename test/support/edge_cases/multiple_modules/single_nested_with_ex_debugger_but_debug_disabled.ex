@@ -1,8 +1,10 @@
-defmodule Support.EdgeCases.MultipleModules.SingleNestedWithoutExDebugger do
-  @moduledoc false
+defmodule Support.EdgeCases.MultipleModules.SingleNestedWithExDebuggerButDebugDisabled do
+  @moduledoc "Identical to SingleNestedWithExDebugger except that debug_options has this helpers explicitly disabled"
   use ExDebugger
 
   defmodule Helpers do
+    use ExDebugger
+
     def calculate(:addend, a, b), do: a + b
     def calculate(:subtrahend, a, b), do: a - b
     def calculate(:multiplicand, a, b), do: a * b

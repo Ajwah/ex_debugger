@@ -1,9 +1,9 @@
 defmodule Support.Tokenizer.A do
   # use ExDebugger.Tokenizer
 
-
   def a(i) do
     b = 1
+
     if i == b do
       :a
     else
@@ -17,8 +17,11 @@ defmodule Support.Tokenizer.A do
 
     i
     |> case do
-      1 -> :a
-      _ -> b
+      1 ->
+        :a
+
+      _ ->
+        b
         |> case do
           1 -> :a
           _ -> :end

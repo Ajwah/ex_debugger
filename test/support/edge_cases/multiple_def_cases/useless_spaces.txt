@@ -1,5 +1,5 @@
 defmodule Support.EdgeCases.MultipleDefCases.UselessSpaces do
-  @moduledoc "In case that `mix format` reorganizes this file, then resort to `useless_spaces.txt`"
+  @moduledoc false
   use ExDebugger
 
 

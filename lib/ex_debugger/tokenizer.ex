@@ -1,22 +1,20 @@
 defmodule ExDebugger.Tokenizer do
   @moduledoc false
 
-  defstruct [
-    file_name: "",
-    defs: [],
-    def_line: 0,
-    def_name: "",
-    module: :none,
-    meta_debug: nil
-    # def_lines: []
-  ]
+  defstruct file_name: "",
+            defs: [],
+            def_line: 0,
+            def_name: "",
+            module: :none,
+            meta_debug: nil
 
-
+  # def_lines: []
   alias ExDebugger.Meta
+
   alias __MODULE__.{
     Definition,
     NestedModule,
-    Repo,
+    Repo
   }
 
   # defmacro __using__(_) do
@@ -33,6 +31,7 @@ defmodule ExDebugger.Tokenizer do
     {def_name, [line: def_line], _} = fn_call_ast
 
     file_name = caller.file
+
     if Repo.is_uninitialized?(file_name) do
       file_name
       |> file
@@ -51,8 +50,9 @@ defmodule ExDebugger.Tokenizer do
       defs: defs,
       # def_lines: defs.def_lines,
       module: caller.module,
-      meta_debug: meta_debug,
+      meta_debug: meta_debug
     })
+
     # |> IO.inspect
   end
 
@@ -66,10 +66,12 @@ defmodule ExDebugger.Tokenizer do
     ground_state = module in nested_modules
 
     module
-    |> Module.split
-    |> Enum.reverse
+    |> Module.split()
+    |> Enum.reverse()
     |> Enum.reduce_while({ground_state, []}, fn
-      _, {true, _} -> {:halt, {true}}
+      _, {true, _} ->
+        {:halt, {true}}
+
       e, {_, module_name_portions} ->
         module_name_portions = Module.concat([e | module_name_portions])
         result = module_name_portions in nested_modules
@@ -104,57 +106,82 @@ defmodule ExDebugger.Tokenizer do
   end
 
   def groupify_defs({tokens, nested_modules}), do: groupify_defs(tokens, %{}, nested_modules)
+
   def groupify_defs([{:identifier, _, :defmodule} | tl], acc, nested_modules) do
     tl
-    |> Definition.all
+    |> Definition.all()
     |> Enum.reduce(acc, fn [{:identifier, {line, _, nil}, :def} | tl], a ->
       [{:end, {last_line, _, nil}} | _] = Enum.reverse(tl)
+
       a
       |> Map.put(line, %{
         first_line: line,
-        last_line: last_line - 1,
-        # lines: tl,
+        last_line: last_line,
+        lines: tl,
         bifurcation_expressions: bifurcation_expressions(tl),
         sections: group_expressions(tl)
-
       })
       |> Map.put(:nested_modules, nested_modules)
+
       # |> Map.update(:def_lines, [line], fn ls -> ls ++ [line] end)
     end)
   end
+
   def groupify_defs(_, _, _), do: {:error, :no_defmodule}
 
   def bifurcation_expressions(tokens) do
     tokens
     |> Enum.reduce(%{}, fn
-      {_, {line, _, _}, :case}, a -> a
+      {_, {line, _, _}, :case}, a ->
+        a
         |> Map.put(line, :case)
         |> Map.update(:case, [line], &(&1 ++ [line]))
-      {_, {line, _, _}, :cond}, a -> a
+
+      {_, {line, _, _}, :cond}, a ->
+        a
         |> Map.put(line, :cond)
         |> Map.update(:cond, [line], &(&1 ++ [line]))
-      {_, {line, _, _}, :if}, a -> a
+
+      {_, {line, _, _}, :if}, a ->
+        a
         |> Map.put(line, :if)
         |> Map.update(:if, [line], &(&1 ++ [line]))
-      _, a -> a
+
+      _, a ->
+        a
     end)
   end
 
   def group_expressions(tokens) do
     tokens
     |> Enum.reduce({[:ignore], %{}}, fn
-      {:fn, _}, {stack, a} -> {[:ignore_block_till_end | stack], a}
-      e = {_, {line, _, _}, :case}, {stack, a} -> {[{:groupify_defs, line} | stack], Map.put(a, line, [e])}
-      e = {_, {line, _, _}, :if}, {stack, a} -> {[{:groupify_defs, line} | stack], Map.put(a, line, [e])}
-      e = {_, {line, _, _}, :cond}, {stack, a} -> {[{:groupify_defs, line} | stack], Map.put(a, line, [e])}
-      e = {:end, {line, _, _}}, {stack = [last_block | tl], a} -> last_block
+      {:fn, _}, {stack, a} ->
+        {[:ignore_block_till_end | stack], a}
+
+      e = {_, {line, _, _}, :case}, {stack, a} ->
+        {[{:groupify_defs, line} | stack], Map.put(a, line, [e])}
+
+      e = {_, {line, _, _}, :if}, {stack, a} ->
+        {[{:groupify_defs, line} | stack], Map.put(a, line, [e])}
+
+      e = {_, {line, _, _}, :cond}, {stack, a} ->
+        {[{:groupify_defs, line} | stack], Map.put(a, line, [e])}
+
+      e = {:end, {line, _, _}}, {stack = [last_block | tl], a} ->
+        last_block
         |> case do
-          :ignore -> {stack, Map.put(a, :end, line)}
-          :ignore_block_till_end -> {tl, a}
-          {:groupify_defs, line} -> {tl, Map.update(a, line, [e], fn ls -> handle_sections(ls ++ [e]) end)}
+          :ignore ->
+            {stack, Map.put(a, :end, line)}
+
+          :ignore_block_till_end ->
+            {tl, a}
+
+          {:groupify_defs, line} ->
+            {tl, Map.update(a, line, [e], fn ls -> handle_sections(ls ++ [e]) end)}
         end
 
-        e, {stack = [last_block | _], a} -> last_block
+      e, {stack = [last_block | _], a} ->
+        last_block
         |> case do
           :ignore -> {stack, a}
           :ignore_block_till_end -> {stack, a}
@@ -166,15 +193,25 @@ defmodule ExDebugger.Tokenizer do
 
   def handle_sections(block = [{_, {_line, _, _}, _op} | _]) do
     block
-    |> Enum.reverse
+    |> Enum.reverse()
     |> Enum.reduce({nil, []}, fn
-      {:end, {line, _, _}}, {nil, []} -> {{:end_section, line - 1}, []}
-      {_, {line, _, _}, :if}, {{:end_section, end_section}, a} -> {{:end_section, line - 1}, [%{start_section: line, end_section: end_section} | a]}
-      {_, {line, _, _}, :else}, {{:end_section, end_section}, a} -> {{:end_section, line - 1}, [%{start_section: line, end_section: end_section} | a]}
-      {_, {line, _, _}, :->}, {{:end_section, end_section}, a} -> {{:end_section, line - 1}, [%{start_section: line, end_section: end_section} | a]}
-      _, acc -> acc
+      {:end, {line, _, _}}, {nil, []} ->
+        {{:end_section, line - 1}, []}
+
+      {_, {line, _, _}, :if}, {{:end_section, end_section}, a} ->
+        {{:end_section, line - 1}, [%{start_section: line, end_section: end_section} | a]}
+
+      {_, {line, _, _}, :else}, {{:end_section, end_section}, a} ->
+        {{:end_section, line - 1}, [%{start_section: line, end_section: end_section} | a]}
+
+      {_, {line, _, _}, :->}, {{:end_section, end_section}, a} ->
+        {{:end_section, line - 1}, [%{start_section: line, end_section: end_section} | a]}
+
+      _, acc ->
+        acc
     end)
     |> elem(1)
+
     # |> Map.put(:block, %{type: op, line: line, raw: block})
   end
 end
