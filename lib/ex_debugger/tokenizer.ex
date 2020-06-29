@@ -110,7 +110,7 @@ defmodule ExDebugger.Tokenizer do
   def groupify_defs([{:identifier, _, :defmodule} | tl], acc, nested_modules) do
     tl
     |> Definition.all()
-    |> Enum.reduce(acc, fn [{:identifier, {line, _, nil}, :def} | tl], a ->
+    |> Enum.reduce(acc, fn [{:identifier, {line, _, nil}, _def_identifier} | tl], a ->
       [{:end, {last_line, _, nil}} | _] = Enum.reverse(tl)
 
       a

@@ -5,12 +5,16 @@ defmodule ExDebugger.Tokenizer.Definition do
     tokens
     |> Enum.drop_while(fn
       {:identifier, _, :def} -> false
+      {:identifier, _, :defp} -> false
       _ -> true
     end)
     |> Enum.chunk_while(
       {:none, []},
       fn
         e = {:identifier, {_, def_indentation_level, _}, :def}, {i, acc} ->
+          {:cont, normalize(acc, i), {def_indentation_level, [e]}}
+
+        e = {:identifier, {_, def_indentation_level, _}, :defp}, {i, acc} ->
           {:cont, normalize(acc, i), {def_indentation_level, [e]}}
 
         e, {def_indentation_level, acc} ->
@@ -36,10 +40,13 @@ defmodule ExDebugger.Tokenizer.Definition do
   def strip_wrong_indentations([], _), do: []
   def strip_wrong_indentations(ls = [_], _), do: ls
 
-  def strip_wrong_indentations([{:identifier, _, :def} | _] = tokens, def_indentation_level) do
+  def strip_wrong_indentations(
+        [{:identifier, _, def_identifier} | _] = tokens,
+        def_indentation_level
+      ) do
     tokens
     |> Enum.reduce({:include, []}, fn
-      e = {:identifier, {_, _, _}, :def}, {_, a} ->
+      e = {:identifier, {_, _, _}, ^def_identifier}, {_, a} ->
         {:include, [e | a]}
 
       e = {:end, {_, _, _}}, {_, a} ->

@@ -45,7 +45,6 @@ defmodule ExDebugger.AstWalker2 do
       )
 
     result
-    |> IO.inspect(label: :incorporate_piped_debug_expressions)
   end
 
   def incorporate_piped_debug_expression(expressions, t = %Tokenizer{},
