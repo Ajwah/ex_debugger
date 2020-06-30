@@ -13,6 +13,9 @@ defmodule EdgeCases.MultipleDefCasesTest do
   use ExUnit.Case, async: false
   alias Support.EdgeCases.MultipleDefCases
 
+  @def_output_label ExDebugger.Def.default_output_labels(:def)
+  @defp_output_label ExDebugger.Def.default_output_labels(:defp)
+
   @file_module_mappings %{
     MultipleDefCases.Various => "various",
     MultipleDefCases.UselessSpaces => "useless_spaces",
@@ -119,23 +122,23 @@ defmodule EdgeCases.MultipleDefCasesTest do
     test ".run with both arguments", ctx do
       ctx.module
       |> run_and_assert_match(:run, [ctx.ls, ctx.opts], [
-        {ctx.module, :calculate, 3, {21, 4, :def_output_only, bindings: [a: 1, b: 3]}},
-        {ctx.module, :calculate, 3, {22, 1, :def_output_only, bindings: [a: 4, b: 3]}},
-        {ctx.module, :calculate, 3, {23, 3, :def_output_only, bindings: [a: 1, b: 3]}},
-        {ctx.module, :calculate, 3, {24, 1.0, :def_output_only, bindings: [a: 3, b: 3]}},
-        {ctx.module, :calculate, 3, {21, 5, :def_output_only, bindings: [a: 2, b: 3]}},
-        {ctx.module, :calculate, 3, {22, 2, :def_output_only, bindings: [a: 5, b: 3]}},
-        {ctx.module, :calculate, 3, {23, 6, :def_output_only, bindings: [a: 2, b: 3]}},
-        {ctx.module, :calculate, 3, {24, 2.0, :def_output_only, bindings: [a: 6, b: 3]}},
-        {ctx.module, :calculate, 3, {21, 6, :def_output_only, bindings: [a: 3, b: 3]}},
-        {ctx.module, :calculate, 3, {22, 3, :def_output_only, bindings: [a: 6, b: 3]}},
-        {ctx.module, :calculate, 3, {23, 9, :def_output_only, bindings: [a: 3, b: 3]}},
-        {ctx.module, :calculate, 3, {24, 3.0, :def_output_only, bindings: [a: 9, b: 3]}},
-        {ctx.module, :calculate, 3, {21, 7, :def_output_only, bindings: [a: 4, b: 3]}},
-        {ctx.module, :calculate, 3, {22, 4, :def_output_only, bindings: [a: 7, b: 3]}},
-        {ctx.module, :calculate, 3, {23, 12, :def_output_only, bindings: [a: 4, b: 3]}},
-        {ctx.module, :calculate, 3, {24, 4.0, :def_output_only, bindings: [a: 12, b: 3]}},
-        {19, [1.0, 2.0, 3.0, 4.0], :def_output_only, bindings: [ls: ctx.ls, opts: ctx.opts]}
+        {ctx.module, :calculate, 3, {21, 4, @defp_output_label, bindings: [a: 1, b: 3]}},
+        {ctx.module, :calculate, 3, {22, 1, @defp_output_label, bindings: [a: 4, b: 3]}},
+        {ctx.module, :calculate, 3, {23, 3, @defp_output_label, bindings: [a: 1, b: 3]}},
+        {ctx.module, :calculate, 3, {24, 1.0, @defp_output_label, bindings: [a: 3, b: 3]}},
+        {ctx.module, :calculate, 3, {21, 5, @defp_output_label, bindings: [a: 2, b: 3]}},
+        {ctx.module, :calculate, 3, {22, 2, @defp_output_label, bindings: [a: 5, b: 3]}},
+        {ctx.module, :calculate, 3, {23, 6, @defp_output_label, bindings: [a: 2, b: 3]}},
+        {ctx.module, :calculate, 3, {24, 2.0, @defp_output_label, bindings: [a: 6, b: 3]}},
+        {ctx.module, :calculate, 3, {21, 6, @defp_output_label, bindings: [a: 3, b: 3]}},
+        {ctx.module, :calculate, 3, {22, 3, @defp_output_label, bindings: [a: 6, b: 3]}},
+        {ctx.module, :calculate, 3, {23, 9, @defp_output_label, bindings: [a: 3, b: 3]}},
+        {ctx.module, :calculate, 3, {24, 3.0, @defp_output_label, bindings: [a: 9, b: 3]}},
+        {ctx.module, :calculate, 3, {21, 7, @defp_output_label, bindings: [a: 4, b: 3]}},
+        {ctx.module, :calculate, 3, {22, 4, @defp_output_label, bindings: [a: 7, b: 3]}},
+        {ctx.module, :calculate, 3, {23, 12, @defp_output_label, bindings: [a: 4, b: 3]}},
+        {ctx.module, :calculate, 3, {24, 4.0, @defp_output_label, bindings: [a: 12, b: 3]}},
+        {19, [1.0, 2.0, 3.0, 4.0], @def_output_label, bindings: [ls: ctx.ls, opts: ctx.opts]}
       ])
     end
 
@@ -143,24 +146,24 @@ defmodule EdgeCases.MultipleDefCasesTest do
     test ".run with default argument", ctx do
       ctx.module
       |> run_and_assert_match(:run, [ctx.ls], [
-        {ctx.module, :calculate, 3, {21, 1, :def_output_only, bindings: [a: 1, b: 0]}},
-        {ctx.module, :calculate, 3, {22, 1, :def_output_only, bindings: [a: 1, b: 0]}},
-        {ctx.module, :calculate, 3, {23, 1, :def_output_only, bindings: [a: 1, b: 1]}},
-        {ctx.module, :calculate, 3, {24, 1.0, :def_output_only, bindings: [a: 1, b: 1]}},
-        {ctx.module, :calculate, 3, {21, 2, :def_output_only, bindings: [a: 2, b: 0]}},
-        {ctx.module, :calculate, 3, {22, 2, :def_output_only, bindings: [a: 2, b: 0]}},
-        {ctx.module, :calculate, 3, {23, 2, :def_output_only, bindings: [a: 2, b: 1]}},
-        {ctx.module, :calculate, 3, {24, 2.0, :def_output_only, bindings: [a: 2, b: 1]}},
-        {ctx.module, :calculate, 3, {21, 3, :def_output_only, bindings: [a: 3, b: 0]}},
-        {ctx.module, :calculate, 3, {22, 3, :def_output_only, bindings: [a: 3, b: 0]}},
-        {ctx.module, :calculate, 3, {23, 3, :def_output_only, bindings: [a: 3, b: 1]}},
-        {ctx.module, :calculate, 3, {24, 3.0, :def_output_only, bindings: [a: 3, b: 1]}},
-        {ctx.module, :calculate, 3, {21, 4, :def_output_only, bindings: [a: 4, b: 0]}},
-        {ctx.module, :calculate, 3, {22, 4, :def_output_only, bindings: [a: 4, b: 0]}},
-        {ctx.module, :calculate, 3, {23, 4, :def_output_only, bindings: [a: 4, b: 1]}},
-        {ctx.module, :calculate, 3, {24, 4.0, :def_output_only, bindings: [a: 4, b: 1]}},
+        {ctx.module, :calculate, 3, {21, 1, @defp_output_label, bindings: [a: 1, b: 0]}},
+        {ctx.module, :calculate, 3, {22, 1, @defp_output_label, bindings: [a: 1, b: 0]}},
+        {ctx.module, :calculate, 3, {23, 1, @defp_output_label, bindings: [a: 1, b: 1]}},
+        {ctx.module, :calculate, 3, {24, 1.0, @defp_output_label, bindings: [a: 1, b: 1]}},
+        {ctx.module, :calculate, 3, {21, 2, @defp_output_label, bindings: [a: 2, b: 0]}},
+        {ctx.module, :calculate, 3, {22, 2, @defp_output_label, bindings: [a: 2, b: 0]}},
+        {ctx.module, :calculate, 3, {23, 2, @defp_output_label, bindings: [a: 2, b: 1]}},
+        {ctx.module, :calculate, 3, {24, 2.0, @defp_output_label, bindings: [a: 2, b: 1]}},
+        {ctx.module, :calculate, 3, {21, 3, @defp_output_label, bindings: [a: 3, b: 0]}},
+        {ctx.module, :calculate, 3, {22, 3, @defp_output_label, bindings: [a: 3, b: 0]}},
+        {ctx.module, :calculate, 3, {23, 3, @defp_output_label, bindings: [a: 3, b: 1]}},
+        {ctx.module, :calculate, 3, {24, 3.0, @defp_output_label, bindings: [a: 3, b: 1]}},
+        {ctx.module, :calculate, 3, {21, 4, @defp_output_label, bindings: [a: 4, b: 0]}},
+        {ctx.module, :calculate, 3, {22, 4, @defp_output_label, bindings: [a: 4, b: 0]}},
+        {ctx.module, :calculate, 3, {23, 4, @defp_output_label, bindings: [a: 4, b: 1]}},
+        {ctx.module, :calculate, 3, {24, 4.0, @defp_output_label, bindings: [a: 4, b: 1]}},
         {ctx.module, :run, 2,
-         {19, [1.0, 2.0, 3.0, 4.0], :def_output_only,
+         {19, [1.0, 2.0, 3.0, 4.0], @def_output_label,
           bindings: [ls: ctx.ls, opts: [addend: 0, subtrahend: 0, multiplicand: 1, divisor: 1]]}}
       ])
     end
@@ -236,7 +239,7 @@ defmodule EdgeCases.MultipleDefCasesTest do
                line: line,
                module: module
              },
-             label: :def_output_only,
+             label: @def_output_label,
              piped_value: piped_value
            } == dump
   end

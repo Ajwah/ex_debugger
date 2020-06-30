@@ -1,36 +1,7 @@
-defmodule Support.CaseStatement.Elaborate do
+defmodule Support.EdgeCases.CaseStatement.Elaborate do
   @moduledoc false
   use ExDebugger
-  # @b 2
 
-  # def test0, do: :q
-
-  # def test1 do
-  #   %{a: 2}
-  # end
-
-  # @doc ""
-  # def test2 do
-  #   """
-  #   This is a question
-  #   What is opinion
-  #   """
-  # end
-
-  # # This is a comment
-  # @doc ""
-  # def test3 do
-  #   %{a: @b}
-
-  #   36364210
-
-  # end
-
-  # def test4, do: @b
-  #   |> List.wrap
-  #   |> Enum.reverse
-
-  # @a 1
   def as_several_case_statements_sequentially(input1, input2, input3) do
     case input1 do
       :ok -> "1. It was ok"

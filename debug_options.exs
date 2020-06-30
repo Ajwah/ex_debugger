@@ -5,8 +5,7 @@ config :ex_debugger, :meta_debug,
   # "Elixir.Support.EdgeCases.MultipleModules.SingleNestedWithoutExDebugger": {true, true, true}
 
   all: %{show_module_tokens: false, show_tokenizer: false, show_ast_before: false, show_ast_after: false},
-  "Elixir.Support.EdgeCases.MultipleModules.SiblingsWithExDebugger": {true, true, true, true},
-  "Elixir.Support.EdgeCases.MultipleModules.SiblingsWithExDebugger.Helpers": {true, true, true, true}
+  "Elixir.Support.EdgeCases.CaseStatement.Elaborate": {true, true, true, true}
 
 config :ex_debugger, :debug,
   capture: :repo, #[:repo, :stdout, :both]
@@ -24,6 +23,7 @@ config :ex_debugger, :debug,
   "Elixir.Support.EdgeCases.MultipleDefCases.Various": true,
   "Elixir.Support.EdgeCases.MultipleDefCases.UselessSpaces": true,
   "Elixir.Support.EdgeCases.CaseStatement.Minimal": true,
+  "Elixir.Support.EdgeCases.CaseStatement.Elaborate": true,
   "Elixir.Support.EdgeCases.MultipleDefCases.DefaultParamWithPrivateHelpers": true,
   "Elixir.Support.EdgeCases.MultipleModules.SingleNestedWithoutExDebugger": true,
   "Elixir.Support.EdgeCases.MultipleModules.SingleNestedWithExDebugger": true,
@@ -32,4 +32,5 @@ config :ex_debugger, :debug,
   "Elixir.Support.EdgeCases.MultipleModules.SiblingsWithExDebugger.Helpers": true,
   "Elixir.Support.EdgeCases.MultipleModules.SingleNestedWithExDebuggerButDebugDisabled": true,
   "Elixir.Support.EdgeCases.MultipleModules.SingleNestedWithExDebuggerButDebugDisabled.Helpers": false, # Explicitly disabled
-  "Elixir.Support.EdgeCases.MultipleDefCases.Overloading": true
+  "Elixir.Support.EdgeCases.MultipleDefCases.Overloading": true,
+  none: false

@@ -17,6 +17,9 @@ defmodule EdgeCases.MinimalCaseStatementTest do
   use ExUnit.Case, async: false
   alias Support.EdgeCases.CaseStatement
 
+  @def_output_label ExDebugger.Def.default_output_labels(:def)
+  # @defp_output_label ExDebugger.Def.default_output_labels(:defp)
+
   @file_module_mappings %{
     CaseStatement.Minimal => "minimal"
   }
@@ -33,7 +36,7 @@ defmodule EdgeCases.MinimalCaseStatementTest do
       CaseStatement.Minimal
       |> run_and_assert_match(:being_piped_inside_contracted_def_form, ctx.input, [
         {8, "It was ok", :case_statement, bindings: [input: :ok]},
-        {10, "It was ok", :def_output_only, bindings: [input: :ok]}
+        {10, "It was ok", @def_output_label, bindings: [input: :ok]}
       ])
     end
 
@@ -41,7 +44,7 @@ defmodule EdgeCases.MinimalCaseStatementTest do
       CaseStatement.Minimal
       |> run_and_assert_match(:as_a_single_vanilla_statement_inside_expanded_def_form, :error, [
         {15, "It was error", :case_statement, bindings: [input: :error]},
-        {17, "It was error", :def_output_only, bindings: [input: :error]}
+        {17, "It was error", @def_output_label, bindings: [input: :error]}
       ])
     end
 
@@ -51,23 +54,23 @@ defmodule EdgeCases.MinimalCaseStatementTest do
       [
         [
           {21, "It was ok", :case_statement, bindings: [input: :ok, r: :ok]},
-          {last_line, "It was ok", :def_output_only, bindings: [input: :ok]}
+          {last_line, "It was ok", @def_output_label, bindings: [input: :ok]}
         ],
         [
           {22, "It was error", :case_statement, bindings: [input: :error, r: :error]},
-          {last_line, "It was error", :def_output_only, bindings: [input: :error]}
+          {last_line, "It was error", @def_output_label, bindings: [input: :error]}
         ],
         [
           {23, "It was 1", :case_statement, bindings: [input: 1, r: 1]},
-          {last_line, "It was 1", :def_output_only, bindings: [input: 1]}
+          {last_line, "It was 1", @def_output_label, bindings: [input: 1]}
         ],
         [
           {24, "It was 2", :case_statement, bindings: [input: 2, r: 2]},
-          {last_line, "It was 2", :def_output_only, bindings: [input: 2]}
+          {last_line, "It was 2", @def_output_label, bindings: [input: 2]}
         ],
         [
           {25, "It was 3", :case_statement, bindings: [input: 3, r: 3]},
-          {last_line, "It was 3", :def_output_only, bindings: [input: 3]}
+          {last_line, "It was 3", @def_output_label, bindings: [input: 3]}
         ]
       ]
       |> Enum.each(fn expectations = [{_, _, _, bindings: [{:input, input} | _]} | _] ->
