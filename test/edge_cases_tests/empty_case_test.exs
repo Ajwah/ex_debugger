@@ -8,8 +8,8 @@ defmodule EdgeCases.EmptyCaseTest do
   use ExUnit.Case, async: false
 
   describe "Empty Case: " do
-    test "Module is injected with d/2,3,4,5" do
-      assert Support.EdgeCases.EmptyCase.__info__(:functions) == [d: 2, d: 3, d: 4, d: 5]
+    test "Module is injected with d/5" do
+      assert Support.EdgeCases.EmptyCase.__info__(:functions) == [d: 5]
     end
   end
 end

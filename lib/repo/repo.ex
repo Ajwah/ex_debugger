@@ -1,5 +1,9 @@
 defmodule ExDebugger.Repo do
-  @moduledoc false
+  @moduledoc """
+  Maintains an ETS-table in which we can cast various debugging events as
+  emmited by the various annotations made when employing `use ExDebugger`
+  """
+
   @max_counter 1_000_000
   @opts [:public, :named_table, :ordered_set, {:write_concurrency, true}, {:keypos, 1}]
   @persistent_term_key {__MODULE__, :counter_ref}
@@ -35,7 +39,7 @@ defmodule ExDebugger.Repo do
 
   def counter_ref, do: :persistent_term.get(@persistent_term_key)
 
-  def insert(value) do
+  def insert(event = %ExDebugger.Event{}) do
     __MODULE__
     |> :ets.info()
     |> case do
@@ -47,7 +51,8 @@ defmodule ExDebugger.Repo do
 
     :ets.insert(
       __MODULE__,
-      {:counters.get(counter_ref(), @counter_id), :erlang.system_time(:nanosecond), value}
+      {:counters.get(counter_ref(), @counter_id), :erlang.system_time(:nanosecond),
+       Map.from_struct(event)}
     )
   end
 

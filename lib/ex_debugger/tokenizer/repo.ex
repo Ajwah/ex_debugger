@@ -1,5 +1,9 @@
 defmodule ExDebugger.Tokenizer.Repo do
-  @moduledoc false
+  @moduledoc """
+  As explained under `ExDebugger.Tokenizer` we need to tokenize the entire file whereas the trigger is on a `def`/`defp`
+  -level. In order to ensure that we are not tokenizing the same file over and over again, this `Repo` will cache
+  accordingly.
+  """
   @opts [:public, :named_table, :ordered_set, {:read_concurrency, true}, {:keypos, 1}]
 
   def new do

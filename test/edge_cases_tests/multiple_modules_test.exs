@@ -17,8 +17,8 @@ defmodule EdgeCases.MultipleModulesTest do
 
   use ExUnit.Case, async: false
   alias Support.EdgeCases.MultipleModules
-  @def_output_label ExDebugger.Def.default_output_labels(:def)
-  # @defp_output_label ExDebugger.Def.default_output_labels(:defp)
+  @def_output_label ExDebugger.Helpers.Def.default_output_labels(:def)
+  # @defp_output_label ExDebugger.Helpers.Def.default_output_labels(:defp)
 
   @file_module_mappings %{
     MultipleModules.SingleNestedWithoutExDebugger => "single_nested_without_ex_debugger",

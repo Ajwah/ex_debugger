@@ -1,5 +1,62 @@
 defmodule ExDebugger.Tokenizer do
-  @moduledoc false
+  @moduledoc """
+  The `AST` that we have access to compile time has a certain amount of loss of information that we need in order to
+  pinpoint a correct line. These general pertain to `end` identifiers which make it very hard to pinpoint the correct
+  line location that is relevant to annotate; such as:
+  ```elixir
+  case a do         # 1.
+    :a -> case b do # 2.
+      :b -> :ok     # 3.
+      :c -> :error  # 4.
+    end             # 5.
+                    # 6.
+    :b -> case c do # 7.
+      :b -> :error  # 8.
+      :c -> :ok     # 9.
+    end             # 10.
+  end               # 11.
+  ```
+
+  `ExDebugger` wants to auto-annotate any bifurcation point. The lines needed to be annotated in this case are only the
+  nested ones:
+    * 3, 4 and
+    * 8, 9
+
+  However, from an algorithmic perspective it is rather difficult to determine whether or not a case expression is nested
+  and that accordingly its parent can be excluded. This leads to the oversimplification of blindly applying the
+  annotation for each and every branch in each and every case expression. As such, we also need to annotate branches `:a`
+  and `:b` for the parent case expression above and the appropriate lines for that would thus constitute lines: 11 and 16
+  respectively.
+
+  However, the AST as received compile time excludes the various `end` identifiers making it difficult to distinguish
+  between the above and for instance:
+    ```elixir
+  case a do         # 1.
+    :a -> case b do # 2.
+      :b -> :ok     # 3.
+      :c -> :error  # 4.
+                    # 5.
+                    # 6.
+                    # 7.
+                    # 8.
+    end             # 9.
+                    # 10.
+    :b -> case c do # 11.
+      :b -> :error  # 12.
+      :c -> :ok     # 13.
+    end             # 14.
+  end               # 15.
+  ```
+  In order to make things easier, this module tokenizes the respective file in which the module resides and scans for
+  the various `end` identifiers accordingly.
+
+  The downside of this solution is that effectively compile time we are tokenizing everything twice; once when Elixir
+  starts compilation and secondly when we hijack the def-macro and tokenize again to correctly annotate the AST.
+
+  Of course, it is not entirely impossible to solely rely on the raw `AST` as provided. Conceptually speaking, it is
+  rather easy to inculcate that a current branch's ending is one less than the starting line of the next branch. I may
+  explore this in the future; in this first iteration I went with a brute force solution instead.
+  """
 
   defstruct file_name: "",
             defs: [],
@@ -8,7 +65,6 @@ defmodule ExDebugger.Tokenizer do
             module: :none,
             meta_debug: nil
 
-  # def_lines: []
   alias ExDebugger.Meta
 
   alias __MODULE__.{
@@ -17,18 +73,15 @@ defmodule ExDebugger.Tokenizer do
     Repo
   }
 
-  # defmacro __using__(_) do
-  #   quote do
-  #     __ENV__.file
-  #     |> ExDebugger.Tokenizer.file
-  #     |> ExDebugger.Tokenizer.groupify_defs
-  #     |> IO.inspect([{:label, __MODULE__} | ExDebugger.Formatter.opts()])
-  #   end
-  # end
-
   def new(caller, fn_call_ast) do
     meta_debug = Meta.new(caller.module)
-    {def_name, [line: def_line], _} = fn_call_ast
+
+    {def_name, def_line} =
+      fn_call_ast
+      |> case do
+        {def_name, [line: def_line], _} -> {def_name, def_line}
+        e -> {elem(e, 0), Keyword.fetch!(elem(e, 1), :line)}
+      end
 
     file_name = caller.file
 
@@ -87,10 +140,18 @@ defmodule ExDebugger.Tokenizer do
   end
 
   def bifurcates?(%__MODULE__{} = t) do
-    t.defs
-    |> Map.fetch!(t.def_line)
-    |> Map.fetch!(:bifurcation_expressions)
-    |> Kernel.!=(%{})
+    try do
+      t.defs
+      |> Map.fetch!(t.def_line)
+      |> Map.fetch!(:bifurcation_expressions)
+      |> Kernel.!=(%{})
+    rescue
+      _ ->
+        ExDebugger.Anomaly.raise(
+          "Entry not found. Only known occurrence for this is when you try to `use ExDebugger` with a `defmacro __using__`.",
+          :entry_not_found
+        )
+    end
   end
 
   def file(file) do

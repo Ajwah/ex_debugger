@@ -17,8 +17,8 @@ defmodule EdgeCases.ElaborateCaseStatementTest do
   use ExUnit.Case, async: false
   alias Support.EdgeCases.CaseStatement
 
-  @def_output_label ExDebugger.Def.default_output_labels(:def)
-  # @defp_output_label ExDebugger.Def.default_output_labels(:defp)
+  @def_output_label ExDebugger.Helpers.Def.default_output_labels(:def)
+  # @defp_output_label ExDebugger.Helpers.Def.default_output_labels(:defp)
 
   @file_module_mappings %{
     CaseStatement.Elaborate => "elaborate"

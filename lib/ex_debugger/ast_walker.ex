@@ -1,5 +1,8 @@
 defmodule ExDebugger.AstWalker do
-  @moduledoc false
+  @moduledoc """
+  Walks the AST and annotates accordingly.
+  """
+
   alias ExDebugger.Tokenizer
   import Record
 
@@ -17,7 +20,7 @@ defmodule ExDebugger.AstWalker do
        [
          expression,
          quote line: line do
-           __MODULE__.d(unquote(type), __ENV__, binding())
+           __MODULE__.d(unquote(type), __ENV__, binding(), false)
          end
        ]}
     ]

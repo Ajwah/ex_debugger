@@ -1,4 +1,4 @@
-defmodule ExDebugger.Def do
+defmodule ExDebugger.Helpers.Def do
   @moduledoc """
   Helper Module to assist in annotating `ast` as received by def/defp
   """
@@ -17,6 +17,8 @@ defmodule ExDebugger.Def do
   def default_output_labels(type), do: Map.fetch!(@default_output_labels, type)
 
   def annotate(type, caller, def_heading_ast, def_do_block_ast) do
+    IO.inspect({def_heading_ast, def_do_block_ast}, label: :annotate)
+
     {updated_def_heading_ast, updated_def_do_block_ast} =
       annotate_definition(type, caller, def_heading_ast, def_do_block_ast)
 
