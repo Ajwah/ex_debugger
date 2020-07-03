@@ -1,27 +1,27 @@
-defmodule EdgeCases.MinimalIfStatementTest do
+defmodule EdgeCases.MinimalCondStatementTest do
   @moduledoc """
   This is part of a series of tests to ensure that `use ExDebugger` will
   not lead to stuff breaking down.
 
   Here we are dealing with modules that contain `def` clauses
-  encompassing simple `if` statements. The focal point of these tests
+  encompassing simple `cond` statements. The focal point of these tests
   is:
     1. Existing functionality is left unmolested
     2. `def` is augmented with a debug statement that shows the output
     of the function.
-    3. Every clause within a `if` statement is appended with a
+    3. Every clause within a `cond` statement is appended with a
     debug statement that shows the resulting output corresponding to that
     clause.
   """
 
   use ExUnit.Case, async: false
-  alias Support.EdgeCases.IfStatement
+  alias Support.EdgeCases.CondStatement
 
   @def_output_label ExDebugger.Helpers.Def.default_output_labels(:def)
   # @defp_output_label ExDebugger.Helpers.Def.default_output_labels(:defp)
 
   @file_module_mappings %{
-    IfStatement.Minimal => "minimal"
+    CondStatement.Minimal => "minimal"
   }
 
   describe "Minimal Case Statement: " do
@@ -30,63 +30,63 @@ defmodule EdgeCases.MinimalIfStatementTest do
 
       {:ok,
        %{
-         module: IfStatement.Minimal
+         module: CondStatement.Minimal
        }}
     end
 
     test ".being_piped_inside_contracted_def_form: :ok", ctx do
       ctx.module
       |> run_and_assert_match(:being_piped_inside_contracted_def_form, true, [
-        {9, "It was ok", :if_statement, bindings: [input: true]},
-        {12, "It was ok", @def_output_label, bindings: [input: true]}
+        {9, "It was ok", :cond_statement, bindings: [input: true]},
+        {10, "It was ok", @def_output_label, bindings: [input: true]}
       ])
     end
 
     test ".being_piped_inside_contracted_def_form: :error", ctx do
       ctx.module
       |> run_and_assert_match(:being_piped_inside_contracted_def_form, false, [
-        {11, "It was error", :if_statement, bindings: [input: false]},
-        {12, "It was error", @def_output_label, bindings: [input: false]}
+        {8, "It was error", :cond_statement, bindings: [input: false]},
+        {10, "It was error", @def_output_label, bindings: [input: false]}
       ])
     end
 
     test ".as_a_single_vanilla_statement_inside_expanded_def_form: true", ctx do
       ctx.module
       |> run_and_assert_match(:as_a_single_vanilla_statement_inside_expanded_def_form, true, [
-        {16, "It was ok", :if_statement, bindings: [input: true]},
-        {20, "It was ok", @def_output_label, bindings: [input: true]}
+        {15, "It was ok", :cond_statement, bindings: [input: true]},
+        {17, "It was ok", @def_output_label, bindings: [input: true]}
       ])
     end
 
     test ".as_a_single_vanilla_statement_inside_expanded_def_form: false", ctx do
       ctx.module
       |> run_and_assert_match(:as_a_single_vanilla_statement_inside_expanded_def_form, false, [
-        {18, "It was error", :if_statement, bindings: [input: false]},
-        {20, "It was error", @def_output_label, bindings: [input: false]}
+        {14, "It was error", :cond_statement, bindings: [input: false]},
+        {17, "It was error", @def_output_label, bindings: [input: false]}
       ])
     end
 
     test ".as_a_single_branch: false", ctx do
       ctx.module
       |> run_and_assert_match(:as_a_single_branch, true, [
-        {24, "It was ok", :if_statement, bindings: [input: true]},
-        {26, "It was ok", @def_output_label, bindings: [input: true]}
+        {21, "It was ok", :cond_statement, bindings: [input: true]},
+        {23, "It was ok", @def_output_label, bindings: [input: true]}
       ])
     end
 
     test ".with_long_branches: true", ctx do
       ctx.module
       |> run_and_assert_match(:with_long_branches, true, [
-        {34, 5, :if_statement, bindings: [input: true]},
-        {42, 5, @def_output_label, bindings: [input: true]}
+        {33, 5, :cond_statement, bindings: [input: true]},
+        {41, 5, @def_output_label, bindings: [input: true]}
       ])
     end
 
     test ".with_long_branches: false", ctx do
       ctx.module
       |> run_and_assert_match(:with_long_branches, false, [
-        {40, 10, :if_statement, bindings: [input: false]},
-        {42, 10, @def_output_label, bindings: [input: false]}
+        {39, 10, :cond_statement, bindings: [input: false]},
+        {41, 10, @def_output_label, bindings: [input: false]}
       ])
     end
   end
@@ -95,7 +95,9 @@ defmodule EdgeCases.MinimalIfStatementTest do
     file_name = Map.fetch!(@file_module_mappings, module)
 
     file =
-      "/Users/kevinjohnson/projects/ex_debugger/test/support/edge_cases/if_statement/#{file_name}.ex"
+      "/Users/kevinjohnson/projects/ex_debugger/test/support/edge_cases/cond_statement/#{
+        file_name
+      }.ex"
 
     input = List.wrap(input)
     function = "&#{fun}/#{Enum.count(input)}"

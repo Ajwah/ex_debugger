@@ -3,7 +3,7 @@ import Config
 config :ex_debugger, :meta_debug,
   all: %{show_module_tokens: false, show_tokenizer: false, show_ast_before: false, show_ast_after: false},
 
-  "Elixir.Support.EdgeCases.IfStatement.Minimal": {true, true, true, true},
+  "Elixir.Support.EdgeCases.CondStatement.Minimal": {true, true, true, true},
   none: "This is only serving as a placeholder to maintain trailing comma of previous line"
 
 config :ex_debugger, :manual_debug,
@@ -34,6 +34,9 @@ config :ex_debugger, :debug,
 
   "Elixir.Support.EdgeCases.IfStatement.Minimal": true,
   "Elixir.Support.EdgeCases.IfStatement.Elaborate": true,
+
+  "Elixir.Support.EdgeCases.CondStatement.Minimal": true,
+  "Elixir.Support.EdgeCases.CondStatement.Elaborate": true,
 
   "Elixir.Support.EdgeCases.MultipleModules.SingleNestedWithoutExDebugger": true,
   "Elixir.Support.EdgeCases.MultipleModules.SingleNestedWithExDebugger": true,

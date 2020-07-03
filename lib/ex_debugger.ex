@@ -1,6 +1,6 @@
 defmodule ExDebugger do
   @moduledoc """
-  # Usage: `use ExDebugger`
+  Usage: `use ExDebugger`
 
   This effectively hijacks macros `def` and `defp` to auto-annotate the `AST` they receive compile time with strategically
   placed debugging expressions where they generate debugging events:

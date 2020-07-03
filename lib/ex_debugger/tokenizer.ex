@@ -272,7 +272,5 @@ defmodule ExDebugger.Tokenizer do
         acc
     end)
     |> elem(1)
-
-    # |> Map.put(:block, %{type: op, line: line, raw: block})
   end
 end

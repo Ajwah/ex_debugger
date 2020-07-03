@@ -1,7 +1,10 @@
 defmodule ExDebugger.Repo do
   @moduledoc """
   Maintains an ETS-table in which we can cast various debugging events as
-  emmited by the various annotations made when employing `use ExDebugger`
+  emmited by the various annotations made when employing `use ExDebugger`.
+
+  Order is guaranteed by `:ordered_set` and usage of `:persistent_term` to
+  increase counter.
   """
 
   @max_counter 1_000_000
