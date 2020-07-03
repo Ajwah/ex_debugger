@@ -50,12 +50,11 @@ defmodule ExDebugger.AstWalker do
     result
   end
 
-  def incorporate_piped_debug_expression(expressions, t = %Tokenizer{},
-        type: type,
-        current_line: l,
-        current_counter: i
+  def incorporate_piped_debug_expression(
+        expressions,
+        acc(tokenizer: t, current_line: l, current_counter: i),
+        type: type
       ) do
-    a = acc(tokenizer: t)
     [last_expression | remainder] = expressions |> Enum.reverse()
 
     section = Enum.at(t.defs[t.def_line].sections[l], i)
@@ -84,7 +83,45 @@ defmodule ExDebugger.AstWalker do
     end
   end
 
+  def postwalk({:if, ctx = [{:line, line} | _], [blocks]}, a = acc()),
+    do: {{:if, ctx, [handle_if_scenarios(blocks, line, a)]}, a}
+
+  def postwalk({:if, ctx, [condition = {_, [line: line], _}, blocks]}, a = acc()),
+    do: {{:if, ctx, [condition, handle_if_scenarios(blocks, line, a)]}, a}
+
   def postwalk(rest, a = acc()), do: {rest, a}
+
+  def handle_if_scenarios(blocks, line, a = acc()) do
+    blocks
+    |> Enum.reduce({acc(a, current_line: line, current_counter: 0), []}, fn
+      {key, {:__block__, ctx, statements}}, {a = acc(), updated_blocks} ->
+        {
+          inc(a),
+          updated_blocks ++
+            [
+              {
+                key,
+                {:__block__, ctx,
+                 incorporate_piped_debug_expression(statements, a, type: :if_statement)}
+              }
+            ]
+        }
+
+      {key, statement}, {a = acc(), updated_blocks} ->
+        {
+          inc(a),
+          updated_blocks ++
+            [
+              {
+                key,
+                {:__block__, [],
+                 incorporate_piped_debug_expression([statement], a, type: :if_statement)}
+              }
+            ]
+        }
+    end)
+    |> elem(1)
+  end
 
   def handle_case_scenarios(case_scenarios, a = acc()) do
     case_scenarios
@@ -101,22 +138,13 @@ defmodule ExDebugger.AstWalker do
 
   def handle_block(
         {:__block__, ctx, statements},
-        acc(tokenizer: t, current_line: l, current_counter: i)
+        a = acc()
       ) do
-    {:__block__, ctx,
-     incorporate_piped_debug_expression(statements, t,
-       type: :case_statement,
-       current_line: l,
-       current_counter: i
-     )}
+    {:__block__, ctx, incorporate_piped_debug_expression(statements, a, type: :case_statement)}
   end
 
-  def handle_block(statements, acc(tokenizer: t, current_line: l, current_counter: i)) do
+  def handle_block(statements, a = acc()) do
     {:__block__, [],
-     incorporate_piped_debug_expression(List.wrap(statements), t,
-       type: :case_statement,
-       current_line: l,
-       current_counter: i
-     )}
+     incorporate_piped_debug_expression(List.wrap(statements), a, type: :case_statement)}
   end
 end

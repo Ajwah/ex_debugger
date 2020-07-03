@@ -1,6 +1,6 @@
 defmodule ExDebugger do
   @moduledoc """
-  Usage: `use ExDebugger`
+  # Usage: `use ExDebugger`
 
   This effectively hijacks macros `def` and `defp` to auto-annotate the `AST` they receive compile time with strategically
   placed debugging expressions where they generate debugging events:
@@ -101,7 +101,7 @@ defmodule ExDebugger do
   end
 
   defmacro __using__(_) do
-    quote location: :keep do
+    quote do
       @external_resource Application.get_env(:ex_debugger, :debug_options_file)
       @ex_debugger_opts ExDebugger.Options.extract(:debug, __MODULE__)
 

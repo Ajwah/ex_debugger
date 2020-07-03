@@ -36,33 +36,57 @@ defmodule EdgeCases.MinimalIfStatementTest do
 
     test ".being_piped_inside_contracted_def_form: :ok", ctx do
       ctx.module
-      |> run_and_assert_match(:being_piped_inside_contracted_def_form, :ok, [
-        {8, "It was ok", :if_statement, bindings: [input: :ok]},
-        {11, "It was ok", @def_output_label, bindings: [input: :ok]}
+      |> run_and_assert_match(:being_piped_inside_contracted_def_form, true, [
+        {9, "It was ok", :if_statement, bindings: [input: true]},
+        {12, "It was ok", @def_output_label, bindings: [input: true]}
       ])
     end
 
     test ".being_piped_inside_contracted_def_form: :error", ctx do
       ctx.module
-      |> run_and_assert_match(:being_piped_inside_contracted_def_form, :error, [
-        {9, "It was error", :if_statement, bindings: [input: :error]},
-        {11, "It was error", @def_output_label, bindings: [input: :error]}
+      |> run_and_assert_match(:being_piped_inside_contracted_def_form, false, [
+        {11, "It was error", :if_statement, bindings: [input: false]},
+        {12, "It was error", @def_output_label, bindings: [input: false]}
       ])
     end
 
-    test ".as_a_single_vanilla_statement_inside_expanded_def_form: :ok", ctx do
+    test ".as_a_single_vanilla_statement_inside_expanded_def_form: true", ctx do
       ctx.module
-      |> run_and_assert_match(:as_a_single_vanilla_statement_inside_expanded_def_form, :ok, [
-        {17, "It was ok", :if_statement, bindings: [input: :ok]},
-        {19, "It was ok", @def_output_label, bindings: [input: :ok]}
+      |> run_and_assert_match(:as_a_single_vanilla_statement_inside_expanded_def_form, true, [
+        {16, "It was ok", :if_statement, bindings: [input: true]},
+        {20, "It was ok", @def_output_label, bindings: [input: true]}
       ])
     end
 
-    test ".as_a_single_vanilla_statement_inside_expanded_def_form: :error", ctx do
+    test ".as_a_single_vanilla_statement_inside_expanded_def_form: false", ctx do
       ctx.module
-      |> run_and_assert_match(:as_a_single_vanilla_statement_inside_expanded_def_form, :error, [
-        {17, "It was error", :if_statement, bindings: [input: :error]},
-        {19, "It was error", @def_output_label, bindings: [input: :error]}
+      |> run_and_assert_match(:as_a_single_vanilla_statement_inside_expanded_def_form, false, [
+        {18, "It was error", :if_statement, bindings: [input: false]},
+        {20, "It was error", @def_output_label, bindings: [input: false]}
+      ])
+    end
+
+    test ".as_a_single_branch: false", ctx do
+      ctx.module
+      |> run_and_assert_match(:as_a_single_branch, true, [
+        {24, "It was ok", :if_statement, bindings: [input: true]},
+        {26, "It was ok", @def_output_label, bindings: [input: true]}
+      ])
+    end
+
+    test ".with_long_branches: true", ctx do
+      ctx.module
+      |> run_and_assert_match(:with_long_branches, true, [
+        {34, 5, :if_statement, bindings: [input: true]},
+        {42, 5, @def_output_label, bindings: [input: true]}
+      ])
+    end
+
+    test ".with_long_branches: false", ctx do
+      ctx.module
+      |> run_and_assert_match(:with_long_branches, false, [
+        {40, 10, :if_statement, bindings: [input: false]},
+        {42, 10, @def_output_label, bindings: [input: false]}
       ])
     end
 
