@@ -3,17 +3,19 @@ import Config
 config :ex_debugger, :meta_debug,
   all: %{show_module_tokens: false, show_tokenizer: false, show_ast_before: false, show_ast_after: false},
 
-  "Elixir.Support.EdgeCases.CondStatement.Minimal": {true, true, true, true},
+  # "Elixir.Support.DiscoveredBugs.ConsOperator.AutoCase": {true, true, true, true},
+  "Elixir.Support.DiscoveredBugs.ConsOperator.ManualCase": {true, true, true, true},
   none: "This is only serving as a placeholder to maintain trailing comma of previous line"
 
 config :ex_debugger, :manual_debug,
-  capture: :repo, #[:repo, :stdout, :both]
+  capture: :both, #[:repo, :stdout, :both]
   all: true,
   none: "This is only serving as a placeholder to maintain trailing comma of previous line"
 
 config :ex_debugger, :debug,
-  capture: :repo, #[:repo, :stdout, :both]
+  capture: :both, #[:repo, :stdout, :both]
   all: false,
+  "Elixir.HelloWorld": true,
   "Elixir.Support.EdgeCases.EmptyCase": true,
   "Elixir.Support.EdgeCases.SingleDefCases.ContractedFormSimple": true,
   "Elixir.Support.EdgeCases.SingleDefCases.ContractedFormComplex": true,
@@ -59,4 +61,7 @@ config :ex_debugger, :debug,
   "Elixir.Support.EdgeCases.UseCases.MainModuleWithExDebuggerUseHelperModuleWithExDebugger": true,
   "Elixir.Support.EdgeCases.UseCases.MainModuleWithoutExDebuggerUseHelperModuleWithExDebugger": true,
   "Elixir.Support.EdgeCases.UseCases.MainModuleWithoutExDebuggerUseHelperModuleWithExDebuggerAtModuleLevel": true,
+
+  "Elixir.Support.DiscoveredBugs.ConsOperator.AutoCase": true,
+  "Elixir.Support.DiscoveredBugs.ConsOperator.ManualCase": true,
   none: "This is only serving as a placeholder to maintain trailing comma of previous line"

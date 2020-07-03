@@ -1,19 +1,21 @@
 defmodule ExDebugger.AstWalker do
-  @moduledoc """
-  Walks the AST and annotates accordingly.
-  """
+  # Walks the AST and annotates accordingly.
+  @moduledoc false
 
   alias ExDebugger.Tokenizer
   import Record
 
+  @typedoc false
   defrecord :acc,
     tokenizer: %{},
     current_line: 0,
     current_counter: 0
 
+  @doc false
   def inc(a = acc(current_counter: current_counter)),
     do: acc(a, current_counter: current_counter + 1)
 
+  @doc false
   def pipe_debug_expression(expression, type: type, line: line) do
     [
       {:|>, [],
@@ -26,6 +28,7 @@ defmodule ExDebugger.AstWalker do
     ]
   end
 
+  @doc false
   def incorporate_piped_debug_expressions(expressions, t = %Tokenizer{})
       when is_list(expressions) do
     expressions
@@ -33,6 +36,7 @@ defmodule ExDebugger.AstWalker do
     |> elem(0)
   end
 
+  @doc false
   def incorporate_piped_debug_expressions({op, ctx, expressions}, t = %Tokenizer{})
       when is_list(expressions) do
     [result] =
@@ -50,6 +54,7 @@ defmodule ExDebugger.AstWalker do
     result
   end
 
+  @doc false
   def incorporate_piped_debug_expression(
         expressions,
         acc(tokenizer: t, current_line: l, current_counter: i),
@@ -65,6 +70,7 @@ defmodule ExDebugger.AstWalker do
     |> Enum.reverse()
   end
 
+  @doc false
   def postwalk({:case, ctx = [line: current_line], do_clause}, a = acc()) do
     do_clause
     |> case do
@@ -83,18 +89,23 @@ defmodule ExDebugger.AstWalker do
     end
   end
 
+  @doc false
   def postwalk({:cond, ctx = [{:line, current_line} | _], [[do: blocks]]}, a = acc()),
     do:
       {{:cond, ctx, [[do: handle_cond_scenarios(blocks, acc(a, current_line: current_line))]]}, a}
 
+  @doc false
   def postwalk({:if, ctx = [{:line, line} | _], [blocks]}, a = acc()),
     do: {{:if, ctx, [handle_if_scenarios(blocks, line, a)]}, a}
 
+  @doc false
   def postwalk({:if, ctx, [condition = {_, [line: line], _}, blocks]}, a = acc()),
     do: {{:if, ctx, [condition, handle_if_scenarios(blocks, line, a)]}, a}
 
+  @doc false
   def postwalk(rest, a = acc()), do: {rest, a}
 
+  @doc false
   def handle_if_scenarios(blocks, line, a = acc()) do
     blocks
     |> Enum.reduce({acc(a, current_line: line, current_counter: 0), []}, fn
@@ -127,6 +138,7 @@ defmodule ExDebugger.AstWalker do
     |> elem(1)
   end
 
+  @doc false
   def handle_case_scenarios(case_scenarios, a = acc()) do
     case_scenarios
     |> Enum.reduce({a, []}, fn e, {a, handled_case_scenarios} ->
@@ -136,6 +148,7 @@ defmodule ExDebugger.AstWalker do
     |> Enum.reverse()
   end
 
+  @doc false
   def handle_cond_scenarios(cond_scenarios, a = acc()) do
     cond_scenarios
     |> Enum.reduce({a, []}, fn e, {a, handled_cond_scenarios} ->
@@ -145,14 +158,17 @@ defmodule ExDebugger.AstWalker do
     |> Enum.reverse()
   end
 
+  @doc false
   def handle_case_scenario({:->, ctx, [matcher, block]}, a = acc()) do
     {:->, ctx, [matcher, handle_block(block, a, type: :case_statement)]}
   end
 
+  @doc false
   def handle_cond_scenario({:->, ctx, [matcher, block]}, a = acc()) do
     {:->, ctx, [matcher, handle_block(block, a, type: :cond_statement)]}
   end
 
+  @doc false
   def handle_block(
         {:__block__, ctx, statements},
         a = acc(),
@@ -161,6 +177,7 @@ defmodule ExDebugger.AstWalker do
     {:__block__, ctx, incorporate_piped_debug_expression(statements, a, type: type)}
   end
 
+  @doc false
   def handle_block(statements, a = acc(), type: type) do
     {:__block__, [], incorporate_piped_debug_expression(List.wrap(statements), a, type: type)}
   end

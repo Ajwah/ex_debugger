@@ -16,27 +16,29 @@ defmodule ExDebugger do
   The various debugging events that get generated from such automated annotations should allow a developer to fully
   introspect from beginning till end a particular traversal of the code path while having all the relevant
   information available to understand how state changes accordingly. In the cases where more granularity is required,
-  one can always resort to the convenience of `use ExDebugger.Manual` which is explained therein accordingly.
+  one can always resort to the convenience of `use` `ExDebugger.Manual`.
 
   This behaviour of annotating `AST` compile time in such an invasive and aggressive manner can be toggled in the debug
-  options file: #{Application.get_env(:ex_debugger, :debug_options_file)}. This should facilitate regulating the granularity in which
+  options file: `#{Documentation.debug_options_path()}`. This should facilitate regulating the granularity in which
   debug events are generated during development without the headache of having to eliminate `use ExDebugger` from every
   module when merging into `master` and deploying to production.
   """
 
+  @doc false
   defmacro def(def_heading_ast, def_do_block_ast \\ nil) do
     ExDebugger.Helpers.Def.annotate(:def, __CALLER__, def_heading_ast, def_do_block_ast)
   end
 
+  @doc false
   defmacro defp(def_heading_ast, def_do_block_ast \\ nil) do
     ExDebugger.Helpers.Def.annotate(:defp, __CALLER__, def_heading_ast, def_do_block_ast)
   end
 
   defmodule Options do
-    @moduledoc """
-    Responsible for extracting and validating the various options that users provide to toggle debugging concerns in the
-    debug options file: #{Application.get_env(:ex_debugger, :debug_options_file)}.
-    """
+    # Responsible for extracting and validating the various options that users provide to toggle debugging concerns in the
+    # debug options file: `#{Documentation.debug_options_path()}`.
+    @moduledoc false
+
     defstruct [
       :global_output,
       :default_output,
@@ -47,6 +49,7 @@ defmodule ExDebugger do
     @options Config.Reader.read!(Application.get_env(:ex_debugger, :debug_options_file))
     @valid_capture_options [:repo, :stdout, :both]
 
+    @doc false
     def extract(type, module) do
       with {_, true} <- {:list_check, is_list(@options)},
            {_, ex_debugger} <- {:retrieval, Keyword.get(@options, :ex_debugger)},

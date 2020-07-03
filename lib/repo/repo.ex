@@ -1,19 +1,19 @@
 defmodule ExDebugger.Repo do
-  @moduledoc """
-  Maintains an ETS-table in which we can cast various debugging events as
-  emmited by the various annotations made when employing `use ExDebugger`.
-
-  Order is guaranteed by `:ordered_set` and usage of `:persistent_term` to
-  increase counter.
-  """
+  # Maintains an ETS-table in which we can cast various debugging events as
+  # emmited by the various annotations made when employing `use ExDebugger`.
+  # Order is guaranteed by `:ordered_set` and usage of `:persistent_term` to
+  # increase counter.
+  @moduledoc false
 
   @max_counter 1_000_000
   @opts [:public, :named_table, :ordered_set, {:write_concurrency, true}, {:keypos, 1}]
   @persistent_term_key {__MODULE__, :counter_ref}
   @counter_id 1
 
+  @doc false
   def new, do: new(:counters.new(@max_counter, []))
 
+  @doc false
   def new(counters) do
     __MODULE__
     |> :ets.info()
@@ -27,10 +27,12 @@ defmodule ExDebugger.Repo do
     end
   end
 
+  @doc false
   def dump do
     :ets.tab2list(__MODULE__)
   end
 
+  @doc false
   def lookup(key) do
     __MODULE__
     |> :ets.lookup(key)
@@ -40,8 +42,10 @@ defmodule ExDebugger.Repo do
     end
   end
 
+  @doc false
   def counter_ref, do: :persistent_term.get(@persistent_term_key)
 
+  @doc false
   def insert(event = %ExDebugger.Event{}) do
     __MODULE__
     |> :ets.info()
@@ -59,6 +63,7 @@ defmodule ExDebugger.Repo do
     )
   end
 
+  @doc false
   def reset do
     __MODULE__
     |> :ets.info()

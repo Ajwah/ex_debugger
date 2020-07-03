@@ -1,10 +1,10 @@
 defmodule ExDebugger.Tokenizer.Definition do
-  @moduledoc """
-  Based on the tokens, chunk all the definitions appearing therein and
-  take special note of where they `:end`. Below you can see an example
-  of the various tokens that elixir generates.
-  """
+  @moduledoc false
+  # Based on the tokens, chunk all the definitions appearing therein and
+  # take special note of where they `:end`. Below you can see an example
+  # of the various tokens that elixir generates.
 
+  @doc false
   def all(tokens) do
     tokens
     |> Enum.drop_while(fn
@@ -32,6 +32,7 @@ defmodule ExDebugger.Tokenizer.Definition do
     |> Enum.drop(1)
   end
 
+  @doc false
   def normalize(tokens, def_indentation_level) do
     tokens
     |> trim_beyond_end(def_indentation_level)
@@ -41,6 +42,7 @@ defmodule ExDebugger.Tokenizer.Definition do
     |> Enum.reverse()
   end
 
+  @doc false
   def strip_wrong_indentations([], _), do: []
   def strip_wrong_indentations(ls = [_], _), do: ls
 
@@ -79,6 +81,7 @@ defmodule ExDebugger.Tokenizer.Definition do
     |> elem(1)
   end
 
+  @doc false
   def trim_beyond_end([], _), do: []
 
   def trim_beyond_end(tokens, def_indentation_level) do
@@ -104,25 +107,32 @@ defmodule ExDebugger.Tokenizer.Definition do
     end
   end
 
+  @doc false
   def convert_eol_to_end([{:eol, {x, _, _}} | tl], def_indentation_level),
     do: [{:end, {x, def_indentation_level, :missing_end}} | tl]
 
+  @doc false
   def trim_ending(ls = [], _), do: ls
+  @doc false
   def trim_ending(ls = [_], _), do: ls
+  @doc false
   def trim_ending(ls = [_, _], _), do: ls
 
+  @doc false
   def trim_ending(
         [end_token = {:end, {_, _, _}}, last_line = {_, {lx, _, _}} | tl],
         def_indentation_level
       ),
       do: trim_ending(lx, end_token, def_indentation_level, last_line, tl)
 
+  @doc false
   def trim_ending(
         [end_token = {:end, {_, _, _}}, last_line = {_, {lx, _, _}, _} | tl],
         def_indentation_level
       ),
       do: trim_ending(lx, end_token, def_indentation_level, last_line, tl)
 
+  @doc false
   def trim_ending(lx, {:end, {x, y, tag}}, def_indentation_level, last_line, tl) do
     if tag == :missing_end do
       [{:end, {x, y, nil}}, last_line | tl]

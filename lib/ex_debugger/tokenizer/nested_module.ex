@@ -37,10 +37,12 @@ defmodule ExDebugger.Tokenizer.NestedModule do
   nested module need to be annotated or not.
   """
 
+  @doc false
   def usage_ex_debugger(tokens) do
     usage_ex_debugger(tokens, %{ls: [], module_name: nil})
   end
 
+  @doc false
   def usage_ex_debugger([{:identifier, _, :defmodule} | tl], acc) do
     {module_name, remainder} = name(tl)
     usage_ex_debugger(remainder, %{module_name: module_name, ls: acc.ls})
@@ -53,6 +55,7 @@ defmodule ExDebugger.Tokenizer.NestedModule do
   def usage_ex_debugger([_ | tl], acc), do: usage_ex_debugger(tl, acc)
   def usage_ex_debugger([], %{ls: ls}), do: ls
 
+  @doc false
   def name(ls) when is_list(ls) do
     {acc, tl} = name(ls, [])
 
@@ -64,6 +67,7 @@ defmodule ExDebugger.Tokenizer.NestedModule do
     }
   end
 
+  @doc false
   defp name([{:alias, _, name_portion} | tl], acc), do: name(tl, [name_portion | acc])
   defp name([{:., _} | tl], acc), do: name(tl, acc)
   defp name([{:do, _} | tl], acc), do: {acc, tl}

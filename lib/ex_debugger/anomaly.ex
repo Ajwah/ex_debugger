@@ -1,6 +1,6 @@
 defmodule ExDebugger.Anomaly do
   @moduledoc """
-  Shit happens.
+  Throws exception to alert user about incorrect usage.
   """
 
   import Kernel, except: [raise: 2]
@@ -14,6 +14,7 @@ defmodule ExDebugger.Anomaly do
     })
   end
 
+  @doc false
   def raise(msg, error_code) do
     Kernel.raise(__MODULE__, {msg, error_code})
   end

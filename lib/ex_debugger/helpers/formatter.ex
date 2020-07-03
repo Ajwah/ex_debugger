@@ -18,8 +18,10 @@ defmodule ExDebugger.Helpers.Formatter do
     ]
   ]
 
+  @doc false
   def opts, do: @opts
 
+  @doc false
   def format(%ExDebugger.Event{} = e) do
     piped_value =
       if is_nil(e.piped_value) do

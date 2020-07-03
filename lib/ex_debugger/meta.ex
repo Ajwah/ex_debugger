@@ -3,12 +3,18 @@ defmodule ExDebugger.Meta do
   Debugging the debugger.
   In order to facilitate development of `ExDebugger`, various `inspect`
   statements have been placed strategically which can be switched on/off
-  by means of the settings under `debug_options.exs`.
-
-  The `struct` defined here validates the input received therefrom and
-  provides a set of convenience functions to abstract the code away from
-  'ugly' conditional statements.
+  by means of the settings under `#{Documentation.debug_options_path()}`.
+  ```elixir
+  config :ex_debugger, :meta_debug,
+    all: %{show_module_tokens: false, show_tokenizer: false, show_ast_before: false, show_ast_after: false},
+    "Elixir.Support.EdgeCases.CondStatement.Minimal": {true, true, true, true},
+  ```
   """
+
+  # The `struct` defined here validates the input received therefrom and
+  # provides a set of convenience functions to abstract the code away from
+  # 'ugly' conditional statements.
+  
   @opts ExDebugger.Helpers.Formatter.opts()
 
   @external_resource Application.get_env(:ex_debugger, :debug_options_file)
@@ -31,6 +37,7 @@ defmodule ExDebugger.Meta do
             caller: @default,
             caller_module: nil
 
+  @doc false
   def new(caller_module) do
     meta_debug = Keyword.get(@debug, :ex_debugger) |> Keyword.get(:meta_debug)
 
@@ -51,6 +58,7 @@ defmodule ExDebugger.Meta do
     })
   end
 
+  @doc false
   def debug(input, meta = %__MODULE__{}, def_name, key) do
     if Map.get(meta.all, key) || Map.get(meta.caller, key) do
       IO.inspect(input, [{:label, format_label(meta.caller_module, def_name, key)} | @opts])
@@ -59,15 +67,18 @@ defmodule ExDebugger.Meta do
     input
   end
 
+  @doc false
   defp format_label(caller_module, def_name, key) do
     "#{caller_module}/#{def_name}/#{format_key(key)}"
   end
 
+  @doc false
   defp format_key(:show_module_tokens), do: "caller_module"
   defp format_key(:show_tokenizer), do: "tokenizer"
   defp format_key(:show_ast_before), do: "def_do_block_ast"
   defp format_key(:show_ast_after), do: "updated_def_do_block_ast"
 
+  @doc false
   defp validate_meta_debug(input) do
     input
     |> case do

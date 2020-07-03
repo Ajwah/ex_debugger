@@ -1,8 +1,7 @@
 defmodule ExDebugger.Event do
-  @moduledoc """
-  Debugging Event
-  """
+  @moduledoc false
 
+  @typedoc false
   defstruct [
     :piped_value,
     :label,
@@ -10,6 +9,7 @@ defmodule ExDebugger.Event do
     :env
   ]
 
+  @doc false
   def new(piped_value, label, bindings, env) do
     struct(__MODULE__, %{
       piped_value: piped_value,
@@ -19,6 +19,7 @@ defmodule ExDebugger.Event do
     })
   end
 
+  @doc false
   def cast(event = %__MODULE__{}, capture_medium) do
     stdout = ExDebugger.Helpers.Formatter.format(event)
 
@@ -38,6 +39,7 @@ defmodule ExDebugger.Event do
     event.piped_value
   end
 
+  @doc false
   defp env_to_map(env) do
     {fun, arity} = env.function
     %{module: env.module, function: "&#{fun}/#{arity}", file: env.file, line: env.line}

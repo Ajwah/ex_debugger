@@ -1,7 +1,7 @@
 defmodule ExDebugger.Helpers.Def do
-  @moduledoc """
-  Helper Module to assist in annotating `ast` as received by def/defp
-  """
+  # Helper Module to assist in annotating `ast` as received by def/defp
+  @moduledoc false
+
   alias ExDebugger.{
     AstWalker,
     Meta,
@@ -13,9 +13,11 @@ defmodule ExDebugger.Helpers.Def do
     defp: :defp_output_only
   }
 
+  @doc false
   def default_output_labels, do: @default_output_labels
   def default_output_labels(type), do: Map.fetch!(@default_output_labels, type)
 
+  @doc false
   def annotate(type, caller, def_heading_ast, def_do_block_ast) do
     {updated_def_heading_ast, updated_def_do_block_ast} =
       annotate_definition(type, caller, def_heading_ast, def_do_block_ast)
@@ -37,6 +39,7 @@ defmodule ExDebugger.Helpers.Def do
     end
   end
 
+  @doc false
   defp annotate_definition(type, caller, def_heading_ast, def_do_block_ast) do
     tokenizer = Tokenizer.new(caller, def_heading_ast)
 
@@ -47,6 +50,7 @@ defmodule ExDebugger.Helpers.Def do
     end
   end
 
+  @doc false
   defp annotate_ast(type, tokenizer, def_heading_ast, def_do_block_ast) do
     Meta.debug(tokenizer, tokenizer.meta_debug, tokenizer.def_name, :show_tokenizer)
     Meta.debug(def_do_block_ast, tokenizer.meta_debug, tokenizer.def_name, :show_ast_before)
@@ -64,6 +68,7 @@ defmodule ExDebugger.Helpers.Def do
     {def_heading_ast, updated_def_do_block_ast}
   end
 
+  @doc false
   defp handle_do_block(output_label, [do: {:__block__, ctx, statements}], tokenizer) do
     [last_expression | remainder] =
       if Tokenizer.bifurcates?(tokenizer) do
@@ -86,6 +91,7 @@ defmodule ExDebugger.Helpers.Def do
     ]
   end
 
+  @doc false
   defp handle_do_block(output_label, [do: statement = {op = :|>, ctx, statements}], tokenizer) do
     [
       do: {
@@ -104,6 +110,7 @@ defmodule ExDebugger.Helpers.Def do
     ]
   end
 
+  @doc false
   defp handle_do_block(output_label, [do: statement], tokenizer) do
     [
       do: {

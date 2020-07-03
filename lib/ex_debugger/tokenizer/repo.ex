@@ -1,11 +1,11 @@
 defmodule ExDebugger.Tokenizer.Repo do
-  @moduledoc """
-  As explained under `ExDebugger.Tokenizer` we need to tokenize the entire file whereas the trigger is on a `def`/`defp`
-  -level. In order to ensure that we are not tokenizing the same file over and over again, this `Repo` will cache
-  accordingly.
-  """
+  # As explained under `ExDebugger.Tokenizer` we need to tokenize the entire file whereas the trigger is on a `def`/`defp`
+  # -level. In order to ensure that we are not tokenizing the same file over and over again, this `Repo` will cache
+  # accordingly.
+  @moduledoc false
   @opts [:public, :named_table, :ordered_set, {:read_concurrency, true}, {:keypos, 1}]
 
+  @doc false
   def new do
     __MODULE__
     |> :ets.info()
@@ -22,6 +22,7 @@ defmodule ExDebugger.Tokenizer.Repo do
     end
   end
 
+  @doc false
   def lookup(key) do
     __MODULE__
     |> :ets.lookup(key)
@@ -31,6 +32,7 @@ defmodule ExDebugger.Tokenizer.Repo do
     end
   end
 
+  @doc false
   def is_uninitialized?(key) do
     __MODULE__
     |> :ets.info()
@@ -48,6 +50,7 @@ defmodule ExDebugger.Tokenizer.Repo do
     end
   end
 
+  @doc false
   def insert(value, key) do
     __MODULE__
     |> :ets.info()

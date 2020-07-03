@@ -73,15 +73,19 @@ defmodule ExDebugger.Tokenizer do
     Repo
   }
 
+  @doc false
   def new(caller, fn_call_ast) do
     meta_debug = Meta.new(caller.module)
 
     {def_name, def_line} =
       fn_call_ast
+      # |> IO.inspect(label: :"#{caller.module}___fn_call_ast")
       |> case do
+        {:when, _, [{def_name, [line: def_line], _} | _]} -> {def_name, def_line}
         {def_name, [line: def_line], _} -> {def_name, def_line}
         e -> {elem(e, 0), Keyword.fetch!(elem(e, 1), :line)}
       end
+      # |> IO.inspect(label: :naming_and_line)
 
     file_name = caller.file
 
@@ -114,6 +118,7 @@ defmodule ExDebugger.Tokenizer do
   # name which includes the names of all its parents.
   # The current solution implemented is a bit naive and does not cover
   # all the cases but should suffice for the time being.
+  @doc false
   def module_has_use_ex_debugger?(t = %__MODULE__{}, module) do
     nested_modules = t.defs.nested_modules
     ground_state = module in nested_modules
@@ -133,12 +138,14 @@ defmodule ExDebugger.Tokenizer do
     |> elem(0)
   end
 
+  @doc false
   def last_line(%__MODULE__{} = t) do
     t.defs
     |> Map.fetch!(t.def_line)
     |> Map.fetch!(:last_line)
   end
 
+  @doc false
   def bifurcates?(%__MODULE__{} = t) do
     try do
       t.defs
@@ -154,6 +161,7 @@ defmodule ExDebugger.Tokenizer do
     end
   end
 
+  @doc false
   def file(file) do
     file
     |> File.open!([:charlist])
@@ -162,12 +170,15 @@ defmodule ExDebugger.Tokenizer do
     |> elem(1)
   end
 
+  @doc false
   def nested_modules(tokens = [{:identifier, _, :defmodule} | _]) do
     {tokens, NestedModule.usage_ex_debugger(tokens)}
   end
 
+  @doc false
   def groupify_defs({tokens, nested_modules}), do: groupify_defs(tokens, %{}, nested_modules)
 
+  @doc false
   def groupify_defs([{:identifier, _, :defmodule} | tl], acc, nested_modules) do
     tl
     |> Definition.all()
@@ -188,8 +199,10 @@ defmodule ExDebugger.Tokenizer do
     end)
   end
 
+  @doc false
   def groupify_defs(_, _, _), do: {:error, :no_defmodule}
 
+  @doc false
   def bifurcation_expressions(tokens) do
     tokens
     |> Enum.reduce(%{}, fn
@@ -213,6 +226,7 @@ defmodule ExDebugger.Tokenizer do
     end)
   end
 
+  @doc false
   def group_expressions(tokens) do
     tokens
     |> Enum.reduce({[:ignore], %{}}, fn
@@ -252,6 +266,7 @@ defmodule ExDebugger.Tokenizer do
     |> elem(1)
   end
 
+  @doc false
   def handle_sections(block = [{_, {_line, _, _}, _op} | _]) do
     block
     |> Enum.reverse()

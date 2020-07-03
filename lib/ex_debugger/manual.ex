@@ -1,28 +1,28 @@
 defmodule ExDebugger.Manual do
   @moduledoc """
-  `use ExDebugger.Manual` provides convenience macros that users can
+  `use` `ExDebugger.Manual` provides convenience macros that users can
   employ at strategic places in their code base when they feel that the
   default behaviour of `use ExDebugger` is not sufficient.
 
-  Turning functionality on/off is managed by: #{
-    Application.get_env(:ex_debugger, :debug_options_file)
-  },
+  Turning functionality on/off is managed by: `#{
+    Documentation.debug_options_path()
+  }`,
   similarly to `use ExDebugger`
 
   The following macros are provided:
-  * d/2: First argument denotes the piped_value and second argument a
+  * `dd/2`: First argument denotes the piped_value and second argument a
     specific label for the very same reason you would:
     ```elixir
     value
     |> IO.inspect(label: :some_label)
     ```
-  * d/3: Same as d/2, with an extra argument to force output. This allows
-    users to leave the settings under #{Application.get_env(:ex_debugger, :debug_options_file)} unmolested while
+  * `dd/3`: Same as `dd/2`, with an extra argument to force output. This allows
+    users to leave the settings under `#{Documentation.debug_options_path()}` unmolested while
     quickly checking something.
 
   The benefit of these being macros is that all the strategic places in which users employ debugging statements can remain
   in place without this taking an extra toll on when they need to deploy to production. By switching off all the relevant
-  settings under: #{Application.get_env(:ex_debugger, :debug_options_file)}, occurrences of these macros are compile time
+  settings under: `#{Documentation.debug_options_path()}`, occurrences of these macros are compile time
   replaced by their value without any side effects.
   """
 
@@ -30,6 +30,7 @@ defmodule ExDebugger.Manual do
     quote do
       @external_resource Application.get_env(:ex_debugger, :debug_options_file)
 
+      @spec dd(any(), atom(), boolean()) :: any()
       defmacro dd(piped_value, label, force_output?) do
         ex_debugger_opts = ExDebugger.Options.extract(:manual_debug, __MODULE__)
 
@@ -47,6 +48,7 @@ defmodule ExDebugger.Manual do
         end
       end
 
+      @spec dd(any(), atom()) :: any()
       defmacro dd(piped_value, label) do
         dd(piped_value, label, false)
       end
