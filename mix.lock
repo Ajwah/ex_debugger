@@ -1,0 +1,3 @@
+%{
+  "commendable_comments": {:hex, :commendable_comments, "0.1.0", "88051b8e72dbf79c625bc5c7037ffe11b3a135ab4f1e889ae146fb5d673c8508", [:mix], [], "hexpm", "8072c69f6d4f2f6bfc8146de429907b0ffadf4a2ed7fd9611db518e77be6a6ff"},
+}

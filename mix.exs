@@ -33,7 +33,9 @@ defmodule ExDebugger.MixProject do
   end
 
   defp deps do
-    []
+    [
+      {:commendable_comments, "~> 0.1.0"}
+    ]
   end
 
   defp elixirc_paths(:test), do: ["lib", "test/support"]

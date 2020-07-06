@@ -4,6 +4,20 @@ defmodule ExDebugger.Tokenizer.Definition do
   # take special note of where they `:end`. Below you can see an example
   # of the various tokens that elixir generates.
 
+  @default_def_line 0
+
+  def default_def_line, do: @default_def_line
+  def name_and_line(ast) do
+    ast
+    |> case do
+      {:when, _, [{def_name, potential_def_line, _} | _]} -> {def_name, def_line(potential_def_line)}
+      {def_name, potential_def_line, _} -> {def_name, def_line(potential_def_line)}
+      e -> {elem(e, 0), def_line(elem(e, 1))}
+    end
+  end
+
+  def def_line(potential_def_line), do: Keyword.get(potential_def_line, :line, @default_def_line)
+
   @doc false
   def all(tokens) do
     tokens

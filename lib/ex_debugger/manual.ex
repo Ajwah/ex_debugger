@@ -26,31 +26,35 @@ defmodule ExDebugger.Manual do
   replaced by their value without any side effects.
   """
 
+  def __dd__(piped_value, label, force_output?) do
+    ex_debugger_opts = ExDebugger.Options.extract(:manual_debug, __MODULE__)
+
+    if ex_debugger_opts.global_output || force_output? || ex_debugger_opts.default_output do
+      quote location: :keep do
+        unquote(piped_value)
+        |> ExDebugger.Event.new(unquote(label), binding(), __ENV__)
+        |> ExDebugger.Event.cast(unquote(Macro.escape(ex_debugger_opts)).capture_medium)
+      end
+    else
+      quote do
+        IO.inspect(__MODULE__, label: :debugger_silenced)
+        unquote(piped_value)
+      end
+    end
+  end
+
   defmacro __using__(_) do
     quote do
       @external_resource Application.get_env(:ex_debugger, :debug_options_file)
 
       @spec dd(any(), atom(), boolean()) :: any()
       defmacro dd(piped_value, label, force_output?) do
-        ex_debugger_opts = ExDebugger.Options.extract(:manual_debug, __MODULE__)
-
-        if ex_debugger_opts.global_output || force_output? || ex_debugger_opts.default_output do
-          quote location: :keep do
-            unquote(piped_value)
-            |> ExDebugger.Event.new(unquote(label), binding(), __ENV__)
-            |> ExDebugger.Event.cast(unquote(Macro.escape(ex_debugger_opts)).capture_medium)
-          end
-        else
-          quote do
-            IO.inspect(__MODULE__, label: :debugger_silenced)
-            unquote(piped_value)
-          end
-        end
+        ExDebugger.Manual.__dd__(piped_value, label, force_output?)
       end
 
       @spec dd(any(), atom()) :: any()
       defmacro dd(piped_value, label) do
-        dd(piped_value, label, false)
+        ExDebugger.Manual.__dd__(piped_value, label, false)
       end
     end
   end

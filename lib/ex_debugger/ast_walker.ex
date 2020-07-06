@@ -16,6 +16,10 @@ defmodule ExDebugger.AstWalker do
     do: acc(a, current_counter: current_counter + 1)
 
   @doc false
+  def pipe_debug_expression(expression = {:|, _, _}, type: type, line: line) do
+    pipe_debug_expression([expression], type: type, line: line)
+  end
+
   def pipe_debug_expression(expression, type: type, line: line) do
     [
       {:|>, [],

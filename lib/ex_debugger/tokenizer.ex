@@ -74,18 +74,10 @@ defmodule ExDebugger.Tokenizer do
   }
 
   @doc false
-  def new(caller, fn_call_ast) do
+  def new(caller, def_heading_ast) do
     meta_debug = Meta.new(caller.module)
 
-    {def_name, def_line} =
-      fn_call_ast
-      # |> IO.inspect(label: :"#{caller.module}___fn_call_ast")
-      |> case do
-        {:when, _, [{def_name, [line: def_line], _} | _]} -> {def_name, def_line}
-        {def_name, [line: def_line], _} -> {def_name, def_line}
-        e -> {elem(e, 0), Keyword.fetch!(elem(e, 1), :line)}
-      end
-      # |> IO.inspect(label: :naming_and_line)
+    {def_name, def_line} = Definition.name_and_line(def_heading_ast)
 
     file_name = caller.file
 
