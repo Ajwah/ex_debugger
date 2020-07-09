@@ -1,5 +1,8 @@
 defmodule ExDebugger.Tokenizer.NestedModule do
-  @moduledoc """
+  @moduledoc false
+  use CommendableComments
+
+  @modulecomment """
   Nested Modules require special attention when employing `use ExDebugger`. This is because by default, every module
   imports `Kernel` which includes `def` and `defp` which in the interest of hijacking the same requires `use ExDebugger`
   to import selectively:

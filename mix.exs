@@ -1,7 +1,7 @@
 defmodule ExDebugger.MixProject do
   use Mix.Project
 
-  @version "0.1.1"
+  @vsn "0.1.2"
   @github "https://github.com/Ajwah/ex_debugger"
   def project do
     [
@@ -17,7 +17,7 @@ defmodule ExDebugger.MixProject do
         extras: ["README.md"]
       ],
       aliases: [docs: &build_docs/1],
-      version: @version,
+      version: @vsn,
       elixir: "~> 1.10",
       config_path: "config/config.exs",
       start_permanent: Mix.env() == :prod,
@@ -49,8 +49,8 @@ defmodule ExDebugger.MixProject do
       raise "cannot build docs because escript for ex_doc is not installed"
     end
 
-    args = ["ExDebugger", @version, Mix.Project.compile_path()]
-    opts = ~w[--main ExDebugger --source-ref v#{@version} --source-url #{@github}]
+    args = ["ExDebugger", @vsn, Mix.Project.compile_path()]
+    opts = ~w[--main ExDebugger --source-ref v#{@vsn} --source-url #{@github}]
     System.cmd(ex_doc, args ++ opts)
     Mix.shell().info("Docs built successfully")
   end

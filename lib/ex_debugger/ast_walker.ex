@@ -1,19 +1,34 @@
 defmodule ExDebugger.AstWalker do
   # Walks the AST and annotates accordingly.
   @moduledoc false
-
-  alias ExDebugger.Tokenizer
   import Record
 
-  @typedoc false
   defrecord :acc,
     tokenizer: %{},
     current_line: 0,
     current_counter: 0
 
+  alias ExDebugger.Tokenizer
+
+  @default_polyfurcation_labels %{
+    case: :case_statement,
+    if: :if_statement,
+    cond: :cond_statement
+  }
+
+  @doc false
+  def default_polyfurcation_labels(type), do: Map.fetch!(@default_polyfurcation_labels, type)
+
   @doc false
   def inc(a = acc(current_counter: current_counter)),
     do: acc(a, current_counter: current_counter + 1)
+
+  @doc false
+  def debug_expression_piped_into(type, line) do
+    quote line: line do
+      __MODULE__.d(unquote(type), __ENV__, binding(), false)
+    end
+  end
 
   @doc false
   def pipe_debug_expression(expression = {:|, _, _}, type: type, line: line) do
@@ -22,13 +37,7 @@ defmodule ExDebugger.AstWalker do
 
   def pipe_debug_expression(expression, type: type, line: line) do
     [
-      {:|>, [],
-       [
-         expression,
-         quote line: line do
-           __MODULE__.d(unquote(type), __ENV__, binding(), false)
-         end
-       ]}
+      {:|>, [], [expression, debug_expression_piped_into(type, line)]}
     ]
   end
 
@@ -121,7 +130,9 @@ defmodule ExDebugger.AstWalker do
               {
                 key,
                 {:__block__, ctx,
-                 incorporate_piped_debug_expression(statements, a, type: :if_statement)}
+                 incorporate_piped_debug_expression(statements, a,
+                   type: default_polyfurcation_labels(:if)
+                 )}
               }
             ]
         }
@@ -134,7 +145,9 @@ defmodule ExDebugger.AstWalker do
               {
                 key,
                 {:__block__, [],
-                 incorporate_piped_debug_expression([statement], a, type: :if_statement)}
+                 incorporate_piped_debug_expression([statement], a,
+                   type: default_polyfurcation_labels(:if)
+                 )}
               }
             ]
         }
@@ -164,12 +177,12 @@ defmodule ExDebugger.AstWalker do
 
   @doc false
   def handle_case_scenario({:->, ctx, [matcher, block]}, a = acc()) do
-    {:->, ctx, [matcher, handle_block(block, a, type: :case_statement)]}
+    {:->, ctx, [matcher, handle_block(block, a, type: default_polyfurcation_labels(:case))]}
   end
 
   @doc false
   def handle_cond_scenario({:->, ctx, [matcher, block]}, a = acc()) do
-    {:->, ctx, [matcher, handle_block(block, a, type: :cond_statement)]}
+    {:->, ctx, [matcher, handle_block(block, a, type: default_polyfurcation_labels(:cond))]}
   end
 
   @doc false

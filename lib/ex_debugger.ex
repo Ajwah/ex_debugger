@@ -4,14 +4,15 @@ defmodule ExDebugger do
 
   This effectively hijacks macros `def` and `defp` to auto-annotate the `AST` they receive compile time with strategically
   placed debugging expressions where they generate debugging events:
-    1. At the end of every `def`/`defp`
-    2. At every juncture in every bifurcation expression which are:
+    1. At the beginning of every `def`/`defp`
+    2. At the end of every `def`/`defp`
+    3. At every juncture in every polyfurcation expression which are:
       * case
       * cond
       * if
       * TODO:
-        * unless
-        * Case Arrows of Anonymous Functions
+          * unless
+          * Case Arrows of Anonymous Functions
 
   The various debugging events that get generated from such automated annotations should allow a developer to fully
   introspect from beginning till end a particular traversal of the code path while having all the relevant
@@ -42,12 +43,13 @@ defmodule ExDebugger do
     defstruct [
       :global_output,
       :default_output,
-      :capture_medium
+      :capture_medium,
+      :warn
     ]
 
     @external_resource Application.get_env(:ex_debugger, :debug_options_file)
     @options Config.Reader.read!(Application.get_env(:ex_debugger, :debug_options_file))
-    @valid_capture_options [:repo, :stdout, :both]
+    @valid_capture_options [:repo, :stdout, :both, :none]
 
     @doc false
     def extract(type, module) do
@@ -59,7 +61,8 @@ defmodule ExDebugger do
         struct(__MODULE__, %{
           global_output: options |> Keyword.get(:all),
           default_output: options |> Keyword.get(:"#{module}"),
-          capture_medium: capture_medium(type, options)
+          capture_medium: capture_medium(type, options),
+          warn: options |> Keyword.get(:warn)
         })
       else
         {_stage, false} ->
@@ -111,13 +114,17 @@ defmodule ExDebugger do
       import Kernel, except: [def: 2, defp: 2]
       import ExDebugger, only: [def: 2, defp: 2]
 
+      require Logger
+
       Kernel.def d(piped_value, label, env, bindings, force_output?) do
         if @ex_debugger_opts.global_output || force_output? || @ex_debugger_opts.default_output do
           piped_value
           |> ExDebugger.Event.new(label, bindings, env)
-          |> ExDebugger.Event.cast(@ex_debugger_opts.capture_medium)
+          |> ExDebugger.Event.cast(@ex_debugger_opts.capture_medium, warn: @ex_debugger_opts.warn)
         else
-          IO.inspect(__MODULE__, label: :debugger_silenced)
+          if @ex_debugger_opts.warn do
+            Logger.warn("Debugger output silenced for: #{__MODULE__}")
+          end
         end
 
         piped_value

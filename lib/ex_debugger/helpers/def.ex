@@ -8,10 +8,19 @@ defmodule ExDebugger.Helpers.Def do
     Tokenizer
   }
 
+  @default_input_labels %{
+    def: :__def_input_only__,
+    defp: :__defp_input_only__
+  }
+
   @default_output_labels %{
     def: :def_output_only,
     defp: :defp_output_only
   }
+
+  @doc false
+  def default_input_labels, do: @default_input_labels
+  def default_input_labels(type), do: Map.fetch!(@default_input_labels, type)
 
   @doc false
   def default_output_labels, do: @default_output_labels
@@ -56,7 +65,12 @@ defmodule ExDebugger.Helpers.Def do
     Meta.debug(def_do_block_ast, tokenizer.meta_debug, tokenizer.def_name, :show_ast_before)
 
     updated_def_do_block_ast =
-      handle_do_block(Map.fetch!(@default_output_labels, type), def_do_block_ast, tokenizer)
+      handle_do_block(
+        default_input_labels(type),
+        default_output_labels(type),
+        def_do_block_ast,
+        tokenizer
+      )
 
     Meta.debug(
       updated_def_do_block_ast,
@@ -69,13 +83,19 @@ defmodule ExDebugger.Helpers.Def do
   end
 
   @doc false
-  defp handle_do_block(output_label, [do: {:__block__, ctx, statements}], tokenizer) do
+  defp handle_do_block(input_label, output_label, [do: {:__block__, ctx, statements}], tokenizer) do
     [last_expression | remainder] =
-      if Tokenizer.bifurcates?(tokenizer) do
-        AstWalker.incorporate_piped_debug_expressions(statements, tokenizer)
-      else
-        statements
-      end
+      [
+        AstWalker.pipe_debug_expression(nil,
+          type: input_label,
+          line: tokenizer.def_line
+        )
+        | if Tokenizer.bifurcates?(tokenizer) do
+            AstWalker.incorporate_piped_debug_expressions(statements, tokenizer)
+          else
+            statements
+          end
+      ]
       |> Enum.reverse()
 
     [
@@ -92,39 +112,60 @@ defmodule ExDebugger.Helpers.Def do
   end
 
   @doc false
-  defp handle_do_block(output_label, [do: statement = {op = :|>, ctx, statements}], tokenizer) do
+  defp handle_do_block(input_label, output_label, [do: {op = :|>, ctx, statements}], tokenizer) do
+    statements =
+      if Tokenizer.bifurcates?(tokenizer) do
+        AstWalker.incorporate_piped_debug_expressions(statements, tokenizer)
+      else
+        statements
+      end
+
+    block =
+      {op, ctx, statements}
+      |> AstWalker.pipe_debug_expression(
+        type: output_label,
+        line: Tokenizer.last_line(tokenizer)
+      )
+
     [
       do: {
         :__block__,
         ctx,
-        if Tokenizer.bifurcates?(tokenizer) do
-          {op, ctx, AstWalker.incorporate_piped_debug_expressions(statements, tokenizer)}
-        else
-          statement
-        end
-        |> AstWalker.pipe_debug_expression(
-          type: output_label,
-          line: Tokenizer.last_line(tokenizer)
-        )
+        [
+          AstWalker.pipe_debug_expression(nil,
+            type: input_label,
+            line: tokenizer.def_line
+          )
+          | block
+        ]
       }
     ]
   end
 
   @doc false
-  defp handle_do_block(output_label, [do: statement], tokenizer) do
+  defp handle_do_block(input_label, output_label, [do: statement], tokenizer) do
+    block =
+      if Tokenizer.bifurcates?(tokenizer) do
+        AstWalker.incorporate_piped_debug_expressions(statement, tokenizer)
+      else
+        statement
+      end
+      |> AstWalker.pipe_debug_expression(
+        type: output_label,
+        line: Tokenizer.last_line(tokenizer)
+      )
+
     [
       do: {
         :__block__,
         [],
-        if Tokenizer.bifurcates?(tokenizer) do
-          AstWalker.incorporate_piped_debug_expressions(statement, tokenizer)
-        else
-          statement
-        end
-        |> AstWalker.pipe_debug_expression(
-          type: output_label,
-          line: Tokenizer.last_line(tokenizer)
-        )
+        [
+          AstWalker.pipe_debug_expression(nil,
+            type: input_label,
+            line: tokenizer.def_line
+          )
+          | block
+        ]
       }
     ]
   end

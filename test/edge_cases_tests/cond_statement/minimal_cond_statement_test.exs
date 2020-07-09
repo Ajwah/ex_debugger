@@ -17,76 +17,126 @@ defmodule EdgeCases.MinimalCondStatementTest do
   use ExUnit.Case, async: false
   alias Support.EdgeCases.CondStatement
 
+  @support_dir "#{File.cwd!()}/test/support/edge_cases/cond_statement"
   @def_output_label ExDebugger.Helpers.Def.default_output_labels(:def)
-  # @defp_output_label ExDebugger.Helpers.Def.default_output_labels(:defp)
+  @def_input_label ExDebugger.Helpers.Def.default_input_labels(:def)
+  @cond_label ExDebugger.AstWalker.default_polyfurcation_labels(:cond)
 
   @file_module_mappings %{
     CondStatement.Minimal => "minimal"
   }
 
   describe "Minimal Case Statement: " do
-    setup do
+    setup ctx do
       ExDebugger.Repo.reset()
 
       {:ok,
        %{
-         module: CondStatement.Minimal
+         module: CondStatement.Minimal,
+         defs: %{
+           being_piped_inside_contracted_def_form: %{
+             bindings: [input: ctx.input],
+             first_line: 5,
+             last_line: 10
+           },
+           as_a_single_vanilla_statement_inside_expanded_def_form: %{
+             bindings: [input: ctx.input],
+             first_line: 12,
+             last_line: 17
+           },
+           as_a_single_branch: %{
+             bindings: [input: ctx.input],
+             first_line: 19,
+             last_line: 23
+           },
+           with_long_branches: %{
+             bindings: [input: ctx.input],
+             first_line: 25,
+             last_line: 41
+           }
+         }
        }}
     end
 
-    test ".being_piped_inside_contracted_def_form: :ok", ctx do
+    @tag def: :being_piped_inside_contracted_def_form, input: true
+    test ".being_piped_inside_contracted_def_form: true", ctx do
       ctx.module
-      |> run_and_assert_match(:being_piped_inside_contracted_def_form, true, [
-        {9, "It was ok", :cond_statement, bindings: [input: true]},
-        {10, "It was ok", @def_output_label, bindings: [input: true]}
+      |> run_and_assert_match(ctx.def, ctx.input, [
+        {ctx.defs[ctx.def].first_line, nil, @def_input_label,
+         bindings: ctx.defs[ctx.def].bindings},
+        {9, "It was ok", @cond_label, bindings: ctx.defs[ctx.def].bindings},
+        {ctx.defs[ctx.def].last_line, "It was ok", @def_output_label,
+         bindings: ctx.defs[ctx.def].bindings}
       ])
     end
 
-    test ".being_piped_inside_contracted_def_form: :error", ctx do
+    @tag def: :being_piped_inside_contracted_def_form, input: false
+    test ".being_piped_inside_contracted_def_form: false", ctx do
       ctx.module
-      |> run_and_assert_match(:being_piped_inside_contracted_def_form, false, [
-        {8, "It was error", :cond_statement, bindings: [input: false]},
-        {10, "It was error", @def_output_label, bindings: [input: false]}
+      |> run_and_assert_match(ctx.def, ctx.input, [
+        {ctx.defs[ctx.def].first_line, nil, @def_input_label,
+         bindings: ctx.defs[ctx.def].bindings},
+        {8, "It was error", @cond_label, bindings: ctx.defs[ctx.def].bindings},
+        {ctx.defs[ctx.def].last_line, "It was error", @def_output_label,
+         bindings: ctx.defs[ctx.def].bindings}
       ])
     end
 
+    @tag def: :as_a_single_vanilla_statement_inside_expanded_def_form, input: true
     test ".as_a_single_vanilla_statement_inside_expanded_def_form: true", ctx do
       ctx.module
-      |> run_and_assert_match(:as_a_single_vanilla_statement_inside_expanded_def_form, true, [
-        {15, "It was ok", :cond_statement, bindings: [input: true]},
-        {17, "It was ok", @def_output_label, bindings: [input: true]}
+      |> run_and_assert_match(ctx.def, ctx.input, [
+        {ctx.defs[ctx.def].first_line, nil, @def_input_label,
+         bindings: ctx.defs[ctx.def].bindings},
+        {15, "It was ok", @cond_label, bindings: ctx.defs[ctx.def].bindings},
+        {ctx.defs[ctx.def].last_line, "It was ok", @def_output_label,
+         bindings: ctx.defs[ctx.def].bindings}
       ])
     end
 
+    @tag def: :as_a_single_vanilla_statement_inside_expanded_def_form, input: false
     test ".as_a_single_vanilla_statement_inside_expanded_def_form: false", ctx do
       ctx.module
-      |> run_and_assert_match(:as_a_single_vanilla_statement_inside_expanded_def_form, false, [
-        {14, "It was error", :cond_statement, bindings: [input: false]},
-        {17, "It was error", @def_output_label, bindings: [input: false]}
+      |> run_and_assert_match(ctx.def, ctx.input, [
+        {ctx.defs[ctx.def].first_line, nil, @def_input_label,
+         bindings: ctx.defs[ctx.def].bindings},
+        {14, "It was error", @cond_label, bindings: ctx.defs[ctx.def].bindings},
+        {ctx.defs[ctx.def].last_line, "It was error", @def_output_label,
+         bindings: ctx.defs[ctx.def].bindings}
       ])
     end
 
-    test ".as_a_single_branch: false", ctx do
+    @tag def: :as_a_single_branch, input: true
+    test ".as_a_single_branch: true", ctx do
       ctx.module
-      |> run_and_assert_match(:as_a_single_branch, true, [
-        {21, "It was ok", :cond_statement, bindings: [input: true]},
-        {23, "It was ok", @def_output_label, bindings: [input: true]}
+      |> run_and_assert_match(ctx.def, ctx.input, [
+        {ctx.defs[ctx.def].first_line, nil, @def_input_label,
+         bindings: ctx.defs[ctx.def].bindings},
+        {21, "It was ok", @cond_label, bindings: ctx.defs[ctx.def].bindings},
+        {ctx.defs[ctx.def].last_line, "It was ok", @def_output_label,
+         bindings: ctx.defs[ctx.def].bindings}
       ])
     end
 
+    @tag def: :with_long_branches, input: true
     test ".with_long_branches: true", ctx do
       ctx.module
-      |> run_and_assert_match(:with_long_branches, true, [
-        {33, 5, :cond_statement, bindings: [input: true]},
-        {41, 5, @def_output_label, bindings: [input: true]}
+      |> run_and_assert_match(ctx.def, ctx.input, [
+        {ctx.defs[ctx.def].first_line, nil, @def_input_label,
+         bindings: ctx.defs[ctx.def].bindings},
+        {33, 5, @cond_label, bindings: ctx.defs[ctx.def].bindings},
+        {ctx.defs[ctx.def].last_line, 5, @def_output_label, bindings: ctx.defs[ctx.def].bindings}
       ])
     end
 
+    @tag def: :with_long_branches, input: false
     test ".with_long_branches: false", ctx do
       ctx.module
-      |> run_and_assert_match(:with_long_branches, false, [
-        {39, 10, :cond_statement, bindings: [input: false]},
-        {41, 10, @def_output_label, bindings: [input: false]}
+      |> run_and_assert_match(ctx.def, ctx.input, [
+        {ctx.defs[ctx.def].first_line, nil, @def_input_label,
+         bindings: ctx.defs[ctx.def].bindings},
+        {39, 10, @cond_label, bindings: ctx.defs[ctx.def].bindings},
+        {ctx.defs[ctx.def].last_line, 10, @def_output_label, bindings: ctx.defs[ctx.def].bindings}
       ])
     end
   end
@@ -94,10 +144,7 @@ defmodule EdgeCases.MinimalCondStatementTest do
   def run_and_assert_match(module, fun, input, expectations) do
     file_name = Map.fetch!(@file_module_mappings, module)
 
-    file =
-      "/Users/kevinjohnson/projects/ex_debugger/test/support/edge_cases/cond_statement/#{
-        file_name
-      }.ex"
+    file = "#{@support_dir}/#{file_name}.ex"
 
     input = List.wrap(input)
     function = "&#{fun}/#{Enum.count(input)}"

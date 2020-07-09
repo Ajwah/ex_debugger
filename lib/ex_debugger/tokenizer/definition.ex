@@ -7,12 +7,18 @@ defmodule ExDebugger.Tokenizer.Definition do
   @default_def_line 0
 
   def default_def_line, do: @default_def_line
+
   def name_and_line(ast) do
     ast
     |> case do
-      {:when, _, [{def_name, potential_def_line, _} | _]} -> {def_name, def_line(potential_def_line)}
-      {def_name, potential_def_line, _} -> {def_name, def_line(potential_def_line)}
-      e -> {elem(e, 0), def_line(elem(e, 1))}
+      {:when, _, [{def_name, potential_def_line, _} | _]} ->
+        {def_name, def_line(potential_def_line)}
+
+      {def_name, potential_def_line, _} ->
+        {def_name, def_line(potential_def_line)}
+
+      e ->
+        {elem(e, 0), def_line(elem(e, 1))}
     end
   end
 

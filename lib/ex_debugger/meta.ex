@@ -14,7 +14,7 @@ defmodule ExDebugger.Meta do
   # The `struct` defined here validates the input received therefrom and
   # provides a set of convenience functions to abstract the code away from
   # 'ugly' conditional statements.
-  
+
   @opts ExDebugger.Helpers.Formatter.opts()
 
   @external_resource Application.get_env(:ex_debugger, :debug_options_file)

@@ -1,13 +1,14 @@
 defmodule ExDebugger.Event do
   @moduledoc false
 
-  @typedoc false
   defstruct [
     :piped_value,
     :label,
     :bindings,
     :env
   ]
+
+  require Logger
 
   @doc false
   def new(piped_value, label, bindings, env) do
@@ -20,7 +21,7 @@ defmodule ExDebugger.Event do
   end
 
   @doc false
-  def cast(event = %__MODULE__{}, capture_medium) do
+  def cast(event = %__MODULE__{}, capture_medium, warn: warn?) do
     stdout = ExDebugger.Helpers.Formatter.format(event)
 
     capture_medium
@@ -34,6 +35,11 @@ defmodule ExDebugger.Event do
       :both ->
         IO.puts(stdout)
         ExDebugger.Repo.insert(event)
+
+      :none ->
+        if warn? do
+          Logger.warn("Capture Medium Set To None.")
+        end
     end
 
     event.piped_value

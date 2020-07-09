@@ -17,8 +17,10 @@ defmodule EdgeCases.ElaborateCondStatementTest do
   use ExUnit.Case, async: false
   alias Support.EdgeCases.CondStatement
 
+  @support_dir "#{File.cwd!()}/test/support/edge_cases/cond_statement"
   @def_output_label ExDebugger.Helpers.Def.default_output_labels(:def)
-  # @defp_output_label ExDebugger.Helpers.Def.default_output_labels(:defp)
+  @def_input_label ExDebugger.Helpers.Def.default_input_labels(:def)
+  @cond_label ExDebugger.AstWalker.default_polyfurcation_labels(:cond)
 
   @file_module_mappings %{
     CondStatement.Elaborate => "elaborate"
@@ -30,7 +32,13 @@ defmodule EdgeCases.ElaborateCondStatementTest do
     setup do
       ExDebugger.Repo.reset()
 
-      {:ok, %{module: CondStatement.Elaborate}}
+      {:ok,
+       %{
+         module: CondStatement.Elaborate,
+         def: :as_several_cond_statements_sequentially,
+         first_line: 4,
+         last_line: 19
+       }}
     end
 
     @tag bindings: [input1: true, input2: true, input3: true]
@@ -38,11 +46,12 @@ defmodule EdgeCases.ElaborateCondStatementTest do
       input = Enum.map(ctx.bindings, &elem(&1, 1))
 
       ctx.module
-      |> run_and_assert_match(:as_several_cond_statements_sequentially, input, [
-        {6, "1. It was ok", :cond_statement, bindings: ctx.bindings},
-        {11, "2. It was ok", :cond_statement, bindings: ctx.bindings},
-        {16, "3. It was ok", :cond_statement, bindings: ctx.bindings},
-        {19, "3. It was ok", @def_output_label, bindings: ctx.bindings}
+      |> run_and_assert_match(ctx.def, input, [
+        {ctx.first_line, nil, @def_input_label, bindings: ctx.bindings},
+        {6, "1. It was ok", @cond_label, bindings: ctx.bindings},
+        {11, "2. It was ok", @cond_label, bindings: ctx.bindings},
+        {16, "3. It was ok", @cond_label, bindings: ctx.bindings},
+        {ctx.last_line, "3. It was ok", @def_output_label, bindings: ctx.bindings}
       ])
     end
 
@@ -51,11 +60,12 @@ defmodule EdgeCases.ElaborateCondStatementTest do
       input = Enum.map(ctx.bindings, &elem(&1, 1))
 
       ctx.module
-      |> run_and_assert_match(:as_several_cond_statements_sequentially, input, [
-        {7, "1. It was error", :cond_statement, bindings: ctx.bindings},
-        {11, "2. It was ok", :cond_statement, bindings: ctx.bindings},
-        {16, "3. It was ok", :cond_statement, bindings: ctx.bindings},
-        {19, "3. It was ok", @def_output_label, bindings: ctx.bindings}
+      |> run_and_assert_match(ctx.def, input, [
+        {ctx.first_line, nil, @def_input_label, bindings: ctx.bindings},
+        {7, "1. It was error", @cond_label, bindings: ctx.bindings},
+        {11, "2. It was ok", @cond_label, bindings: ctx.bindings},
+        {16, "3. It was ok", @cond_label, bindings: ctx.bindings},
+        {ctx.last_line, "3. It was ok", @def_output_label, bindings: ctx.bindings}
       ])
     end
 
@@ -64,11 +74,12 @@ defmodule EdgeCases.ElaborateCondStatementTest do
       input = Enum.map(ctx.bindings, &elem(&1, 1))
 
       ctx.module
-      |> run_and_assert_match(:as_several_cond_statements_sequentially, input, [
-        {6, "1. It was ok", :cond_statement, bindings: ctx.bindings},
-        {12, "2. It was error", :cond_statement, bindings: ctx.bindings},
-        {16, "3. It was ok", :cond_statement, bindings: ctx.bindings},
-        {19, "3. It was ok", @def_output_label, bindings: ctx.bindings}
+      |> run_and_assert_match(ctx.def, input, [
+        {ctx.first_line, nil, @def_input_label, bindings: ctx.bindings},
+        {6, "1. It was ok", @cond_label, bindings: ctx.bindings},
+        {12, "2. It was error", @cond_label, bindings: ctx.bindings},
+        {16, "3. It was ok", @cond_label, bindings: ctx.bindings},
+        {ctx.last_line, "3. It was ok", @def_output_label, bindings: ctx.bindings}
       ])
     end
 
@@ -77,11 +88,12 @@ defmodule EdgeCases.ElaborateCondStatementTest do
       input = Enum.map(ctx.bindings, &elem(&1, 1))
 
       ctx.module
-      |> run_and_assert_match(:as_several_cond_statements_sequentially, input, [
-        {6, "1. It was ok", :cond_statement, bindings: ctx.bindings},
-        {11, "2. It was ok", :cond_statement, bindings: ctx.bindings},
-        {17, "3. It was error", :cond_statement, bindings: ctx.bindings},
-        {19, "3. It was error", @def_output_label, bindings: ctx.bindings}
+      |> run_and_assert_match(ctx.def, input, [
+        {ctx.first_line, nil, @def_input_label, bindings: ctx.bindings},
+        {6, "1. It was ok", @cond_label, bindings: ctx.bindings},
+        {11, "2. It was ok", @cond_label, bindings: ctx.bindings},
+        {17, "3. It was error", @cond_label, bindings: ctx.bindings},
+        {ctx.last_line, "3. It was error", @def_output_label, bindings: ctx.bindings}
       ])
     end
 
@@ -90,11 +102,12 @@ defmodule EdgeCases.ElaborateCondStatementTest do
       input = Enum.map(ctx.bindings, &elem(&1, 1))
 
       ctx.module
-      |> run_and_assert_match(:as_several_cond_statements_sequentially, input, [
-        {7, "1. It was error", :cond_statement, bindings: ctx.bindings},
-        {12, "2. It was error", :cond_statement, bindings: ctx.bindings},
-        {16, "3. It was ok", :cond_statement, bindings: ctx.bindings},
-        {19, "3. It was ok", @def_output_label, bindings: ctx.bindings}
+      |> run_and_assert_match(ctx.def, input, [
+        {ctx.first_line, nil, @def_input_label, bindings: ctx.bindings},
+        {7, "1. It was error", @cond_label, bindings: ctx.bindings},
+        {12, "2. It was error", @cond_label, bindings: ctx.bindings},
+        {16, "3. It was ok", @cond_label, bindings: ctx.bindings},
+        {ctx.last_line, "3. It was ok", @def_output_label, bindings: ctx.bindings}
       ])
     end
 
@@ -103,11 +116,12 @@ defmodule EdgeCases.ElaborateCondStatementTest do
       input = Enum.map(ctx.bindings, &elem(&1, 1))
 
       ctx.module
-      |> run_and_assert_match(:as_several_cond_statements_sequentially, input, [
-        {7, "1. It was error", :cond_statement, bindings: ctx.bindings},
-        {11, "2. It was ok", :cond_statement, bindings: ctx.bindings},
-        {17, "3. It was error", :cond_statement, bindings: ctx.bindings},
-        {19, "3. It was error", @def_output_label, bindings: ctx.bindings}
+      |> run_and_assert_match(ctx.def, input, [
+        {ctx.first_line, nil, @def_input_label, bindings: ctx.bindings},
+        {7, "1. It was error", @cond_label, bindings: ctx.bindings},
+        {11, "2. It was ok", @cond_label, bindings: ctx.bindings},
+        {17, "3. It was error", @cond_label, bindings: ctx.bindings},
+        {ctx.last_line, "3. It was error", @def_output_label, bindings: ctx.bindings}
       ])
     end
 
@@ -116,11 +130,12 @@ defmodule EdgeCases.ElaborateCondStatementTest do
       input = Enum.map(ctx.bindings, &elem(&1, 1))
 
       ctx.module
-      |> run_and_assert_match(:as_several_cond_statements_sequentially, input, [
-        {6, "1. It was ok", :cond_statement, bindings: ctx.bindings},
-        {12, "2. It was error", :cond_statement, bindings: ctx.bindings},
-        {17, "3. It was error", :cond_statement, bindings: ctx.bindings},
-        {19, "3. It was error", @def_output_label, bindings: ctx.bindings}
+      |> run_and_assert_match(ctx.def, input, [
+        {ctx.first_line, nil, @def_input_label, bindings: ctx.bindings},
+        {6, "1. It was ok", @cond_label, bindings: ctx.bindings},
+        {12, "2. It was error", @cond_label, bindings: ctx.bindings},
+        {17, "3. It was error", @cond_label, bindings: ctx.bindings},
+        {ctx.last_line, "3. It was error", @def_output_label, bindings: ctx.bindings}
       ])
     end
 
@@ -129,11 +144,12 @@ defmodule EdgeCases.ElaborateCondStatementTest do
       input = Enum.map(ctx.bindings, &elem(&1, 1))
 
       ctx.module
-      |> run_and_assert_match(:as_several_cond_statements_sequentially, input, [
-        {7, "1. It was error", :cond_statement, bindings: ctx.bindings},
-        {12, "2. It was error", :cond_statement, bindings: ctx.bindings},
-        {17, "3. It was error", :cond_statement, bindings: ctx.bindings},
-        {19, "3. It was error", @def_output_label, bindings: ctx.bindings}
+      |> run_and_assert_match(ctx.def, input, [
+        {ctx.first_line, nil, @def_input_label, bindings: ctx.bindings},
+        {7, "1. It was error", @cond_label, bindings: ctx.bindings},
+        {12, "2. It was error", @cond_label, bindings: ctx.bindings},
+        {17, "3. It was error", @cond_label, bindings: ctx.bindings},
+        {ctx.last_line, "3. It was error", @def_output_label, bindings: ctx.bindings}
       ])
     end
   end
@@ -144,7 +160,13 @@ defmodule EdgeCases.ElaborateCondStatementTest do
     setup do
       ExDebugger.Repo.reset()
 
-      {:ok, %{module: CondStatement.Elaborate}}
+      {:ok,
+       %{
+         module: CondStatement.Elaborate,
+         def: :as_several_nested_cond_statements,
+         first_line: 21,
+         last_line: 46
+       }}
     end
 
     @tag bindings: [input1: true, input2: true, input3: true]
@@ -153,11 +175,12 @@ defmodule EdgeCases.ElaborateCondStatementTest do
       output = "1. It was ok"
 
       ctx.module
-      |> run_and_assert_match(:as_several_nested_cond_statements, input, [
-        {25, output, :cond_statement, bindings: ctx.bindings},
-        {28, output, :cond_statement, bindings: ctx.bindings},
-        {34, output, :cond_statement, bindings: ctx.bindings},
-        {46, output, @def_output_label, bindings: ctx.bindings}
+      |> run_and_assert_match(ctx.def, input, [
+        {ctx.first_line, nil, @def_input_label, bindings: ctx.bindings},
+        {25, output, @cond_label, bindings: ctx.bindings},
+        {28, output, @cond_label, bindings: ctx.bindings},
+        {34, output, @cond_label, bindings: ctx.bindings},
+        {ctx.last_line, output, @def_output_label, bindings: ctx.bindings}
       ])
     end
 
@@ -167,11 +190,12 @@ defmodule EdgeCases.ElaborateCondStatementTest do
       output = "3. It was ok"
 
       ctx.module
-      |> run_and_assert_match(:as_several_nested_cond_statements, input, [
-        {37, output, :cond_statement, bindings: ctx.bindings},
-        {39, output, :cond_statement, bindings: ctx.bindings},
-        {44, output, :cond_statement, bindings: ctx.bindings},
-        {46, output, @def_output_label, bindings: ctx.bindings}
+      |> run_and_assert_match(ctx.def, input, [
+        {ctx.first_line, nil, @def_input_label, bindings: ctx.bindings},
+        {37, output, @cond_label, bindings: ctx.bindings},
+        {39, output, @cond_label, bindings: ctx.bindings},
+        {44, output, @cond_label, bindings: ctx.bindings},
+        {ctx.last_line, output, @def_output_label, bindings: ctx.bindings}
       ])
     end
 
@@ -181,11 +205,12 @@ defmodule EdgeCases.ElaborateCondStatementTest do
       output = "2. It was ok"
 
       ctx.module
-      |> run_and_assert_match(:as_several_nested_cond_statements, input, [
-        {30, output, :cond_statement, bindings: ctx.bindings},
-        {32, output, :cond_statement, bindings: ctx.bindings},
-        {34, output, :cond_statement, bindings: ctx.bindings},
-        {46, output, @def_output_label, bindings: ctx.bindings}
+      |> run_and_assert_match(ctx.def, input, [
+        {ctx.first_line, nil, @def_input_label, bindings: ctx.bindings},
+        {30, output, @cond_label, bindings: ctx.bindings},
+        {32, output, @cond_label, bindings: ctx.bindings},
+        {34, output, @cond_label, bindings: ctx.bindings},
+        {ctx.last_line, output, @def_output_label, bindings: ctx.bindings}
       ])
     end
 
@@ -195,11 +220,12 @@ defmodule EdgeCases.ElaborateCondStatementTest do
       output = "1. It was error"
 
       ctx.module
-      |> run_and_assert_match(:as_several_nested_cond_statements, input, [
-        {26, output, :cond_statement, bindings: ctx.bindings},
-        {28, output, :cond_statement, bindings: ctx.bindings},
-        {34, output, :cond_statement, bindings: ctx.bindings},
-        {46, output, @def_output_label, bindings: ctx.bindings}
+      |> run_and_assert_match(ctx.def, input, [
+        {ctx.first_line, nil, @def_input_label, bindings: ctx.bindings},
+        {26, output, @cond_label, bindings: ctx.bindings},
+        {28, output, @cond_label, bindings: ctx.bindings},
+        {34, output, @cond_label, bindings: ctx.bindings},
+        {ctx.last_line, output, @def_output_label, bindings: ctx.bindings}
       ])
     end
 
@@ -209,11 +235,12 @@ defmodule EdgeCases.ElaborateCondStatementTest do
       output = "4. It was ok"
 
       ctx.module
-      |> run_and_assert_match(:as_several_nested_cond_statements, input, [
-        {41, output, :cond_statement, bindings: ctx.bindings},
-        {43, output, :cond_statement, bindings: ctx.bindings},
-        {44, output, :cond_statement, bindings: ctx.bindings},
-        {46, output, @def_output_label, bindings: ctx.bindings}
+      |> run_and_assert_match(ctx.def, input, [
+        {ctx.first_line, nil, @def_input_label, bindings: ctx.bindings},
+        {41, output, @cond_label, bindings: ctx.bindings},
+        {43, output, @cond_label, bindings: ctx.bindings},
+        {44, output, @cond_label, bindings: ctx.bindings},
+        {ctx.last_line, output, @def_output_label, bindings: ctx.bindings}
       ])
     end
 
@@ -223,11 +250,12 @@ defmodule EdgeCases.ElaborateCondStatementTest do
       output = "3. It was error"
 
       ctx.module
-      |> run_and_assert_match(:as_several_nested_cond_statements, input, [
-        {38, output, :cond_statement, bindings: ctx.bindings},
-        {39, output, :cond_statement, bindings: ctx.bindings},
-        {44, output, :cond_statement, bindings: ctx.bindings},
-        {46, output, @def_output_label, bindings: ctx.bindings}
+      |> run_and_assert_match(ctx.def, input, [
+        {ctx.first_line, nil, @def_input_label, bindings: ctx.bindings},
+        {38, output, @cond_label, bindings: ctx.bindings},
+        {39, output, @cond_label, bindings: ctx.bindings},
+        {44, output, @cond_label, bindings: ctx.bindings},
+        {ctx.last_line, output, @def_output_label, bindings: ctx.bindings}
       ])
     end
 
@@ -237,11 +265,12 @@ defmodule EdgeCases.ElaborateCondStatementTest do
       output = "2. It was error"
 
       ctx.module
-      |> run_and_assert_match(:as_several_nested_cond_statements, input, [
-        {31, output, :cond_statement, bindings: ctx.bindings},
-        {32, output, :cond_statement, bindings: ctx.bindings},
-        {34, output, :cond_statement, bindings: ctx.bindings},
-        {46, output, @def_output_label, bindings: ctx.bindings}
+      |> run_and_assert_match(ctx.def, input, [
+        {ctx.first_line, nil, @def_input_label, bindings: ctx.bindings},
+        {31, output, @cond_label, bindings: ctx.bindings},
+        {32, output, @cond_label, bindings: ctx.bindings},
+        {34, output, @cond_label, bindings: ctx.bindings},
+        {ctx.last_line, output, @def_output_label, bindings: ctx.bindings}
       ])
     end
 
@@ -251,11 +280,12 @@ defmodule EdgeCases.ElaborateCondStatementTest do
       output = "4. It was error"
 
       ctx.module
-      |> run_and_assert_match(:as_several_nested_cond_statements, input, [
-        {42, output, :cond_statement, bindings: ctx.bindings},
-        {43, output, :cond_statement, bindings: ctx.bindings},
-        {44, output, :cond_statement, bindings: ctx.bindings},
-        {46, output, @def_output_label, bindings: ctx.bindings}
+      |> run_and_assert_match(ctx.def, input, [
+        {ctx.first_line, nil, @def_input_label, bindings: ctx.bindings},
+        {42, output, @cond_label, bindings: ctx.bindings},
+        {43, output, @cond_label, bindings: ctx.bindings},
+        {44, output, @cond_label, bindings: ctx.bindings},
+        {ctx.last_line, output, @def_output_label, bindings: ctx.bindings}
       ])
     end
   end
@@ -263,10 +293,7 @@ defmodule EdgeCases.ElaborateCondStatementTest do
   def run_and_assert_match(module, fun, input, expectations) do
     file_name = Map.fetch!(@file_module_mappings, module)
 
-    file =
-      "/Users/kevinjohnson/projects/ex_debugger/test/support/edge_cases/cond_statement/#{
-        file_name
-      }.ex"
+    file = "#{@support_dir}/#{file_name}.ex"
 
     input = List.wrap(input)
     function = "&#{fun}/#{Enum.count(input)}"

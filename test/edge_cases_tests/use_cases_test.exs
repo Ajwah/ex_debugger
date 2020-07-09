@@ -10,7 +10,9 @@ defmodule EdgeCases.UseCasesTest do
   use ExUnit.Case, async: false
   alias Support.EdgeCases.UseCases
 
+  @support_dir "#{File.cwd!()}/test/support/edge_cases/use_cases"
   @def_output_label ExDebugger.Helpers.Def.default_output_labels(:def)
+  @def_input_label ExDebugger.Helpers.Def.default_input_labels(:def)
 
   @file_module_mappings %{
     UseCases.HelperModuleWithExDebugger => "helper_module_with_ex_debugger",
@@ -37,90 +39,126 @@ defmodule EdgeCases.UseCasesTest do
 
   @tag :not_working_properly
   describe "MainModuleWithExDebuggerUseHelperModuleWithExDebugger: " do
-    setup do
+    setup ctx do
       {
         :ok,
         %{
           module: UseCases.MainModuleWithExDebuggerUseHelperModuleWithExDebugger,
-          helper_module: UseCases.HelperModuleWithoutExDebugger
+          helper_module: UseCases.HelperModuleWithoutExDebugger,
+          input: bindings_to_input(ctx.bindings),
+          def: :run,
+          first_line: 8,
+          last_line: 17
         }
       }
     end
 
-    @tag ls: [1, 2, 3, 4], opts: [addend: 3, subtrahend: 3, multiplicand: 3, divisor: 3]
+    @tag bindings: [
+           ls: [1, 2, 3, 4],
+           opts: [addend: 3, subtrahend: 3, multiplicand: 3, divisor: 3]
+         ]
     test ".run with both arguments", ctx do
       ctx.module
-      |> run_and_assert_match(:run, [ctx.ls, ctx.opts], [
-        {17, [1.0, 2.0, 3.0, 4.0], @def_output_label, bindings: [ls: ctx.ls, opts: ctx.opts]}
+      |> run_and_assert_match(ctx.def, ctx.input, [
+        {ctx.first_line, nil, @def_input_label, bindings: ctx.bindings},
+        {ctx.last_line, [1.0, 2.0, 3.0, 4.0], @def_output_label, bindings: ctx.bindings}
       ])
     end
 
-    @tag ls: [1, 2, 3, 4], opts: [addend: 0, subtrahend: 0, multiplicand: 1, divisor: 1]
+    @tag bindings: [
+           ls: [1, 2, 3, 4],
+           opts: [addend: 0, subtrahend: 0, multiplicand: 1, divisor: 1]
+         ]
     test ".run with default argument", ctx do
       ctx.module
-      |> run_and_assert_match(:run, [ctx.ls], [
-        {ctx.module, :run, 2,
-         {17, [1.0, 2.0, 3.0, 4.0], @def_output_label, bindings: [ls: ctx.ls, opts: ctx.opts]}}
+      |> run_and_assert_match(ctx.def, [hd(ctx.input)], [
+        {ctx.module, ctx.def, 2, {ctx.first_line, nil, @def_input_label, bindings: ctx.bindings}},
+        {ctx.module, ctx.def, 2,
+         {ctx.last_line, [1.0, 2.0, 3.0, 4.0], @def_output_label, bindings: ctx.bindings}}
       ])
     end
   end
 
   @tag :not_working_properly
   describe "MainModuleWithExDebuggerUseHelperModuleWithExDebuggerAtModuleLevel: " do
-    setup do
+    setup ctx do
       {
         :ok,
         %{
           module: UseCases.MainModuleWithExDebuggerUseHelperModuleWithExDebuggerAtModuleLevel,
-          helper_module: UseCases.HelperModuleWithoutExDebugger
+          helper_module: UseCases.HelperModuleWithoutExDebugger,
+          input: bindings_to_input(ctx.bindings),
+          def: :run,
+          first_line: 8,
+          last_line: 17
         }
       }
     end
 
-    @tag ls: [1, 2, 3, 4], opts: [addend: 3, subtrahend: 3, multiplicand: 3, divisor: 3]
+    @tag bindings: [
+           ls: [1, 2, 3, 4],
+           opts: [addend: 3, subtrahend: 3, multiplicand: 3, divisor: 3]
+         ]
     test ".run with both arguments", ctx do
       ctx.module
-      |> run_and_assert_match(:run, [ctx.ls, ctx.opts], [
-        {17, [1.0, 2.0, 3.0, 4.0], @def_output_label, bindings: [ls: ctx.ls, opts: ctx.opts]}
+      |> run_and_assert_match(ctx.def, ctx.input, [
+        {ctx.first_line, nil, @def_input_label, bindings: ctx.bindings},
+        {ctx.last_line, [1.0, 2.0, 3.0, 4.0], @def_output_label, bindings: ctx.bindings}
       ])
     end
 
-    @tag ls: [1, 2, 3, 4], opts: [addend: 0, subtrahend: 0, multiplicand: 1, divisor: 1]
+    @tag bindings: [
+           ls: [1, 2, 3, 4],
+           opts: [addend: 0, subtrahend: 0, multiplicand: 1, divisor: 1]
+         ]
     test ".run with default argument", ctx do
       ctx.module
-      |> run_and_assert_match(:run, [ctx.ls], [
-        {ctx.module, :run, 2,
-         {17, [1.0, 2.0, 3.0, 4.0], @def_output_label, bindings: [ls: ctx.ls, opts: ctx.opts]}}
+      |> run_and_assert_match(ctx.def, [hd(ctx.input)], [
+        {ctx.module, ctx.def, 2, {ctx.first_line, nil, @def_input_label, bindings: ctx.bindings}},
+        {ctx.module, ctx.def, 2,
+         {ctx.last_line, [1.0, 2.0, 3.0, 4.0], @def_output_label, bindings: ctx.bindings}}
       ])
     end
   end
 
   @tag :not_working_properly
   describe "MainModuleWithExDebuggerUseHelperModuleWithoutExDebugger: " do
-    setup do
+    setup ctx do
       {
         :ok,
         %{
           module: UseCases.MainModuleWithExDebuggerUseHelperModuleWithoutExDebugger,
-          helper_module: UseCases.HelperModuleWithoutExDebugger
+          helper_module: UseCases.HelperModuleWithoutExDebugger,
+          input: bindings_to_input(ctx.bindings),
+          def: :run,
+          first_line: 8,
+          last_line: 17
         }
       }
     end
 
-    @tag ls: [1, 2, 3, 4], opts: [addend: 3, subtrahend: 3, multiplicand: 3, divisor: 3]
+    @tag bindings: [
+           ls: [1, 2, 3, 4],
+           opts: [addend: 3, subtrahend: 3, multiplicand: 3, divisor: 3]
+         ]
     test ".run with both arguments", ctx do
       ctx.module
-      |> run_and_assert_match(:run, [ctx.ls, ctx.opts], [
-        {17, [1.0, 2.0, 3.0, 4.0], @def_output_label, bindings: [ls: ctx.ls, opts: ctx.opts]}
+      |> run_and_assert_match(ctx.def, ctx.input, [
+        {ctx.first_line, nil, @def_input_label, bindings: ctx.bindings},
+        {ctx.last_line, [1.0, 2.0, 3.0, 4.0], @def_output_label, bindings: ctx.bindings}
       ])
     end
 
-    @tag ls: [1, 2, 3, 4], opts: [addend: 0, subtrahend: 0, multiplicand: 1, divisor: 1]
+    @tag bindings: [
+           ls: [1, 2, 3, 4],
+           opts: [addend: 0, subtrahend: 0, multiplicand: 1, divisor: 1]
+         ]
     test ".run with default argument", ctx do
       ctx.module
-      |> run_and_assert_match(:run, [ctx.ls], [
-        {ctx.module, :run, 2,
-         {17, [1.0, 2.0, 3.0, 4.0], @def_output_label, bindings: [ls: ctx.ls, opts: ctx.opts]}}
+      |> run_and_assert_match(ctx.def, [hd(ctx.input)], [
+        {ctx.module, ctx.def, 2, {ctx.first_line, nil, @def_input_label, bindings: ctx.bindings}},
+        {ctx.module, ctx.def, 2,
+         {ctx.last_line, [1.0, 2.0, 3.0, 4.0], @def_output_label, bindings: ctx.bindings}}
       ])
     end
   end
@@ -235,7 +273,31 @@ defmodule EdgeCases.UseCasesTest do
   def file(module) do
     file_name = Map.fetch!(@file_module_mappings, module)
 
-    "/Users/kevinjohnson/projects/ex_debugger/test/support/edge_cases/use_cases/#{file_name}.ex"
+    "#{@support_dir}/#{file_name}.ex"
+  end
+
+  def bindings_to_input(bindings) do
+    bindings
+    |> Enum.reduce([], fn
+      e, a when is_map(e) ->
+        e =
+          e
+          |> Enum.reduce(%{}, fn {k, v}, a ->
+            v
+            |> case do
+              {_, v} -> Map.put(a, k, v)
+              vs when is_list(vs) -> Map.put(a, k, vs)
+            end
+          end)
+
+        a ++ [e]
+
+      {_, v}, a ->
+        a ++ [v]
+
+      e, a ->
+        a ++ [e]
+    end)
   end
 
   def bindings(bindings) do

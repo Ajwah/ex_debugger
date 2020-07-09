@@ -4,9 +4,7 @@ defmodule ExDebugger.Manual do
   employ at strategic places in their code base when they feel that the
   default behaviour of `use ExDebugger` is not sufficient.
 
-  Turning functionality on/off is managed by: `#{
-    Documentation.debug_options_path()
-  }`,
+  Turning functionality on/off is managed by: `#{Documentation.debug_options_path()}`,
   similarly to `use ExDebugger`
 
   The following macros are provided:
@@ -33,12 +31,20 @@ defmodule ExDebugger.Manual do
       quote location: :keep do
         unquote(piped_value)
         |> ExDebugger.Event.new(unquote(label), binding(), __ENV__)
-        |> ExDebugger.Event.cast(unquote(Macro.escape(ex_debugger_opts)).capture_medium)
+        |> ExDebugger.Event.cast(unquote(Macro.escape(ex_debugger_opts)).capture_medium,
+          warn: unquote(Macro.escape(ex_debugger_opts)).warn
+        )
       end
     else
-      quote do
-        IO.inspect(__MODULE__, label: :debugger_silenced)
-        unquote(piped_value)
+      if ex_debugger_opts.warn do
+        quote do
+          Logger.warn("Debugger output silenced for: #{__MODULE__}")
+          unquote(piped_value)
+        end
+      else
+        quote do
+          unquote(piped_value)
+        end
       end
     end
   end
@@ -46,6 +52,7 @@ defmodule ExDebugger.Manual do
   defmacro __using__(_) do
     quote do
       @external_resource Application.get_env(:ex_debugger, :debug_options_file)
+      require Logger
 
       @spec dd(any(), atom(), boolean()) :: any()
       defmacro dd(piped_value, label, force_output?) do

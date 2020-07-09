@@ -2,18 +2,19 @@ import Config
 
 config :ex_debugger, :meta_debug,
   all: %{show_module_tokens: false, show_tokenizer: false, show_ast_before: false, show_ast_after: false},
-
-  "Elixir.Support.DiscoveredBugs.ConsOperator.AutoCase": {true, true, true, true},
-  "Elixir.Support.DiscoveredBugs.ConsOperator.ManualCase": {true, true, true, true},
-  none: "This is only serving as a placeholder to maintain trailing comma of previous line"
+  # "Elixir.Support.DiscoveredBugs.ConsOperator.AutoCase": {true, true, true, true},
+  # "Elixir.Support.DiscoveredBugs.ConsOperator.ManualCase": {true, true, true, true},
+  placeholder_serving_no_functional_value: "This is only serving as a placeholder to maintain trailing comma of previous line"
 
 config :ex_debugger, :manual_debug,
-  capture: :repo, #[:repo, :stdout, :both]
+  capture: :repo, #[:repo, :stdout, :both, :none]
+  warn: false,
   all: true,
-  none: "This is only serving as a placeholder to maintain trailing comma of previous line"
+  placeholder_serving_no_functional_value: "This is only serving as a placeholder to maintain trailing comma of previous line"
 
 config :ex_debugger, :debug,
-  capture: :repo, #[:repo, :stdout, :both]
+  capture: :repo, #[:repo, :stdout, :both, :none]
+  warn: false,
   all: false,
   "Elixir.HelloWorld": true,
   "Elixir.Support.EdgeCases.EmptyCase": true,
@@ -64,4 +65,4 @@ config :ex_debugger, :debug,
 
   "Elixir.Support.DiscoveredBugs.ConsOperator.AutoCase": true,
   "Elixir.Support.DiscoveredBugs.ConsOperator.ManualCase": true,
-  none: "This is only serving as a placeholder to maintain trailing comma of previous line"
+  placeholder_serving_no_functional_value: "This is only serving as a placeholder to maintain trailing comma of previous line"

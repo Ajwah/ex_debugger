@@ -1,5 +1,11 @@
 defmodule ExDebugger.Tokenizer do
-  @moduledoc """
+  @moduledoc false
+  use CommendableComments
+  
+  @modulecomment """
+  Ideally, as a regular user one should not need to know about this. However, as leaky abstractions tend to bite us by
+  surprise; it may be important to be aware of this.
+
   The `AST` that we have access to compile time has a certain amount of loss of information that we need in order to
   pinpoint a correct line. These general pertain to `end` identifiers which make it very hard to pinpoint the correct
   line location that is relevant to annotate; such as:
@@ -17,7 +23,7 @@ defmodule ExDebugger.Tokenizer do
   end               # 11.
   ```
 
-  `ExDebugger` wants to auto-annotate any bifurcation point. The lines needed to be annotated in this case are only the
+  `ExDebugger` wants to auto-annotate any polyfurcation point. The lines needed to be annotated in this case are only the
   nested ones:
     * 3, 4 and
     * 8, 9
@@ -25,7 +31,7 @@ defmodule ExDebugger.Tokenizer do
   However, from an algorithmic perspective it is rather difficult to determine whether or not a case expression is nested
   and that accordingly its parent can be excluded. This leads to the oversimplification of blindly applying the
   annotation for each and every branch in each and every case expression. As such, we also need to annotate branches `:a`
-  and `:b` for the parent case expression above and the appropriate lines for that would thus constitute lines: 11 and 16
+  and `:b` for the parent case expression above and the appropriate lines for that would thus constitute lines: 5 and 10
   respectively.
 
   However, the AST as received compile time excludes the various `end` identifiers making it difficult to distinguish
@@ -142,7 +148,7 @@ defmodule ExDebugger.Tokenizer do
     try do
       t.defs
       |> Map.fetch!(t.def_line)
-      |> Map.fetch!(:bifurcation_expressions)
+      |> Map.fetch!(:polyfurcation_expressions)
       |> Kernel.!=(%{})
     rescue
       _ ->
@@ -182,7 +188,7 @@ defmodule ExDebugger.Tokenizer do
         first_line: line,
         last_line: last_line,
         lines: tl,
-        bifurcation_expressions: bifurcation_expressions(tl),
+        polyfurcation_expressions: polyfurcation_expressions(tl),
         sections: group_expressions(tl)
       })
       |> Map.put(:nested_modules, nested_modules)
@@ -195,7 +201,7 @@ defmodule ExDebugger.Tokenizer do
   def groupify_defs(_, _, _), do: {:error, :no_defmodule}
 
   @doc false
-  def bifurcation_expressions(tokens) do
+  def polyfurcation_expressions(tokens) do
     tokens
     |> Enum.reduce(%{}, fn
       {_, {line, _, _}, :case}, a ->

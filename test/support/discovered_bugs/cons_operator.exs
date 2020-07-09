@@ -1,5 +1,6 @@
 defmodule Support.DiscoveredBugs.ConsOperator do
   use CommendableComments
+
   @modulecomment """
   This is to address the bug that was discovered where using a `cons operator`
   within a `case expression` would cause a `CompileError` to be raised:
@@ -42,7 +43,7 @@ defmodule Support.DiscoveredBugs.ConsOperator do
       input
       |> case do
         1 -> [input | @rest] |> dd(:inspect)
-        i -> [(input + 1) | @rest] |> dd(:inspect)
+        i -> [input + 1 | @rest] |> dd(:inspect)
       end
     end
   end
@@ -56,7 +57,7 @@ defmodule Support.DiscoveredBugs.ConsOperator do
       input
       |> case do
         1 -> [input | @rest]
-        i -> [(input + 1) | @rest]
+        i -> [input + 1 | @rest]
       end
     end
   end

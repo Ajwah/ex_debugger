@@ -1,6 +1,6 @@
 defmodule DiscoveredBugsTests.DefinitionTest do
   alias ExDebugger.Tokenizer.Definition
-  
+
   @moduledoc """
   Wrong name was derived when definition had `when` incorporated into it.
 
@@ -17,7 +17,9 @@ defmodule DiscoveredBugsTests.DefinitionTest do
       * Contracted Form Without Line Number But With When
       * Expanded Form Without Line Number But With When
 
-    In the latter case, the line number returned should default to: #{Definition.default_def_line()}
+    In the latter case, the line number returned should default to: #{
+    Definition.default_def_line()
+  }
   """
 
   use ExUnit.Case, async: false
@@ -39,6 +41,7 @@ defmodule DiscoveredBugsTests.DefinitionTest do
         def a do
           b = 1
           c = 2
+
           if b == c do
             :ok
           else
@@ -59,7 +62,7 @@ defmodule DiscoveredBugsTests.DefinitionTest do
     test "Expanded Form With When", ctx do
       quote line: ctx.expected.def_line do
         def a(b, c, d) when is_integer(b) and is_integer(c) and is_integer(d) do
-          if (b - d) == c do
+          if b - d == c do
             :ok
           else
             :not_ok
@@ -87,6 +90,7 @@ defmodule DiscoveredBugsTests.DefinitionTest do
         def a do
           b = 1
           c = 2
+
           if b == c do
             :ok
           else
@@ -107,7 +111,7 @@ defmodule DiscoveredBugsTests.DefinitionTest do
     test "Expanded Form With When", ctx do
       quote do
         def a(b, c, d) when is_integer(b) and is_integer(c) and is_integer(d) do
-          if (b - d) == c do
+          if b - d == c do
             :ok
           else
             :not_ok
@@ -119,12 +123,14 @@ defmodule DiscoveredBugsTests.DefinitionTest do
   end
 
   defp assert_def_name_line_match(ast, expected) do
-    actual = ast
-    |> def_heading_ast
-    |> Definition.name_and_line
+    actual =
+      ast
+      |> def_heading_ast
+      |> Definition.name_and_line()
 
     assert expected_tuple(expected) == actual
   end
+
   defp expected_tuple(%{def_name: def_name, def_line: def_line}), do: {def_name, def_line}
   defp def_heading_ast({:def, _, [def_heading_ast, _def_do_block_ast]}), do: def_heading_ast
 end
