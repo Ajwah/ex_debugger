@@ -24,8 +24,8 @@ defmodule ExDebugger.Manual do
   replaced by their value without any side effects.
   """
 
-  def __dd__(piped_value, label, force_output?) do
-    ex_debugger_opts = ExDebugger.Options.extract(:manual_debug, __MODULE__)
+  def __dd__(piped_value, label, module, force_output?) do
+    ex_debugger_opts = ExDebugger.Options.extract(:manual_debug, module)
 
     if ex_debugger_opts.global_output || force_output? || ex_debugger_opts.default_output do
       quote location: :keep do
@@ -38,7 +38,7 @@ defmodule ExDebugger.Manual do
     else
       if ex_debugger_opts.warn do
         quote do
-          Logger.warn("Debugger output silenced for: #{__MODULE__}")
+          Logger.warn("Manual Debugger output silenced for: #{__MODULE__}")
           unquote(piped_value)
         end
       else
@@ -56,12 +56,22 @@ defmodule ExDebugger.Manual do
 
       @spec dd(any(), atom(), boolean()) :: any()
       defmacro dd(piped_value, label, force_output?) do
-        ExDebugger.Manual.__dd__(piped_value, label, force_output?)
+        ExDebugger.Manual.__dd__(piped_value, label, __MODULE__, force_output?)
       end
 
       @spec dd(any(), atom()) :: any()
       defmacro dd(piped_value, label) do
-        ExDebugger.Manual.__dd__(piped_value, label, false)
+        ExDebugger.Manual.__dd__(piped_value, label, __MODULE__, false)
+      end
+
+      @spec dd(atom()) :: any()
+      defmacro dd(label) do
+        ExDebugger.Manual.__dd__(nil, label, __MODULE__, false)
+      end
+
+      @spec dd :: any()
+      defmacro dd do
+        ExDebugger.Manual.__dd__(nil, nil, __MODULE__, false)
       end
     end
   end
