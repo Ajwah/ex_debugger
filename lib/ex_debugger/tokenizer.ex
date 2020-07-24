@@ -1,7 +1,7 @@
 defmodule ExDebugger.Tokenizer do
   @moduledoc false
   use CommendableComments
-  
+
   @modulecomment """
   Ideally, as a regular user one should not need to know about this. However, as leaky abstractions tend to bite us by
   surprise; it may be important to be aware of this.

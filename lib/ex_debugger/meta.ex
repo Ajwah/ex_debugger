@@ -17,8 +17,12 @@ defmodule ExDebugger.Meta do
 
   @opts ExDebugger.Helpers.Formatter.opts()
 
-  @external_resource Application.get_env(:ex_debugger, :debug_options_file)
-  @debug Config.Reader.read!(Application.get_env(:ex_debugger, :debug_options_file))
+  if Application.get_env(:ex_debugger, :debug_options_file) do
+    @external_resource Application.get_env(:ex_debugger, :debug_options_file)
+    @debug Config.Reader.read!(Application.get_env(:ex_debugger, :debug_options_file))
+  else
+    @debug %{}
+  end
 
   @accepted_keys MapSet.new([
                    :show_module_tokens,

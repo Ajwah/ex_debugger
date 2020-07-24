@@ -24,7 +24,6 @@ defmodule ExDebugger do
   debug events are generated during development without the headache of having to eliminate `use ExDebugger` from every
   module when merging into `master` and deploying to production.
   """
-
   @doc false
   defmacro def(def_heading_ast, def_do_block_ast \\ nil) do
     ExDebugger.Helpers.Def.annotate(:def, __CALLER__, def_heading_ast, def_do_block_ast)
@@ -47,8 +46,13 @@ defmodule ExDebugger do
       :warn
     ]
 
-    @external_resource Application.get_env(:ex_debugger, :debug_options_file)
-    @options Config.Reader.read!(Application.get_env(:ex_debugger, :debug_options_file))
+    if Application.get_env(:ex_debugger, :debug_options_file) do
+      @external_resource Application.get_env(:ex_debugger, :debug_options_file)
+      @options Config.Reader.read!(Application.get_env(:ex_debugger, :debug_options_file))
+    else
+      @options :no_debug_options_file_set
+    end
+
     @valid_capture_options [:repo, :stdout, :both, :none]
 
     @doc false
@@ -65,6 +69,13 @@ defmodule ExDebugger do
           warn: options |> Keyword.get(:warn)
         })
       else
+        {:list_check, false} ->
+          if @options == :no_debug_options_file_set do
+            :no_debug_options_file_set
+          else
+            do_raise("Missing Configuration", type, :missing_configuration)
+          end
+
         {_stage, false} ->
           do_raise("Missing Configuration", type, :missing_configuration)
       end
@@ -107,27 +118,38 @@ defmodule ExDebugger do
   end
 
   defmacro __using__(_) do
-    quote do
-      @external_resource Application.get_env(:ex_debugger, :debug_options_file)
-      @ex_debugger_opts ExDebugger.Options.extract(:debug, __MODULE__)
-
+    quote location: :keep do
       import Kernel, except: [def: 2, defp: 2]
       import ExDebugger, only: [def: 2, defp: 2]
 
       require Logger
 
-      Kernel.def d(piped_value, label, env, bindings, force_output?) do
-        if @ex_debugger_opts.global_output || force_output? || @ex_debugger_opts.default_output do
-          piped_value
-          |> ExDebugger.Event.new(label, bindings, env)
-          |> ExDebugger.Event.cast(@ex_debugger_opts.capture_medium, warn: @ex_debugger_opts.warn)
-        else
-          if @ex_debugger_opts.warn do
-            Logger.warn("Debugger output silenced for: #{__MODULE__}")
-          end
-        end
+      if Application.get_env(:ex_debugger, :debug_options_file) do
+        @external_resource Application.get_env(:ex_debugger, :debug_options_file)
+        @ex_debugger_opts ExDebugger.Options.extract(:debug, __MODULE__)
 
-        piped_value
+        @doc false
+        Kernel.def d(piped_value, label, env, bindings, force_output?) do
+          if @ex_debugger_opts.global_output || force_output? || @ex_debugger_opts.default_output do
+            piped_value
+            |> ExDebugger.Event.new(label, bindings, env)
+            |> ExDebugger.Event.cast(@ex_debugger_opts.capture_medium,
+              warn: @ex_debugger_opts.warn
+            )
+          else
+            if @ex_debugger_opts.warn do
+              Logger.warn("Debugger output silenced for: #{__MODULE__}")
+            end
+          end
+
+          piped_value
+        end
+      else
+        
+        @doc false
+        Kernel.def d(piped_value, _, _, _, _) do
+          piped_value
+        end
       end
     end
   end

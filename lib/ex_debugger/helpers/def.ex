@@ -28,12 +28,17 @@ defmodule ExDebugger.Helpers.Def do
 
   @doc false
   def annotate(type, caller, def_heading_ast, def_do_block_ast) do
-    ex_debugger_opts = ExDebugger.Options.extract(:debug, caller.module)
+    {updated_def_heading_ast, updated_def_do_block_ast} =
+      if Application.get_env(:ex_debugger, :debug_options_file) do
+        ex_debugger_opts = ExDebugger.Options.extract(:debug, caller.module)
 
-    {updated_def_heading_ast, updated_def_do_block_ast} = if ex_debugger_opts.capture_medium == :none do
-        {def_heading_ast, def_do_block_ast}
+        if ex_debugger_opts.capture_medium == :none do
+          {def_heading_ast, def_do_block_ast}
+        else
+          annotate_definition(type, caller, def_heading_ast, def_do_block_ast)
+        end
       else
-        annotate_definition(type, caller, def_heading_ast, def_do_block_ast)
+        {def_heading_ast, def_do_block_ast}
       end
 
     type
