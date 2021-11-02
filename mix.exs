@@ -1,7 +1,7 @@
 defmodule ExDebugger.MixProject do
   use Mix.Project
 
-  @vsn "0.1.3"
+  @vsn "0.1.5"
   @github "https://github.com/Ajwah/ex_debugger"
   @name "ExDebugger"
 
@@ -20,7 +20,7 @@ defmodule ExDebugger.MixProject do
       ],
       aliases: [docs: &build_docs/1],
       version: @vsn,
-      elixir: "~> 1.10",
+      elixir: "~> 1.13.0-rc.0",
       config_path: "config/config.exs",
       start_permanent: Mix.env() == :prod,
       elixirc_paths: elixirc_paths(Mix.env()),

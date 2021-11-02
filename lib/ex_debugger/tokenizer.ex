@@ -165,7 +165,9 @@ defmodule ExDebugger.Tokenizer do
     |> File.open!([:charlist])
     |> IO.read(:all)
     |> :elixir_tokenizer.tokenize(1, [])
-    |> elem(1)
+    |> case do
+      {:ok, _, _, _, ls} -> ls
+    end
   end
 
   @doc false

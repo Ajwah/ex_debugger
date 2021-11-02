@@ -35,7 +35,7 @@ defmodule DiscoveredBugsTests.Various do
                bindings: [input: 1],
                env: %{
                  file:
-                   "/Users/kevinjohnson/projects/ex_debugger/test/support/discovered_bugs/discrepancy_dd_2_3.ex",
+                   "/Users/ajwah/projects/ex_debugger/test/support/discovered_bugs/discrepancy_dd_2_3.ex",
                  function: "&dd_3_case_2/1",
                  line: 13,
                  module: Support.DiscoveredBugs.Discrepancy_dd_2_3
@@ -53,7 +53,7 @@ defmodule DiscoveredBugsTests.Various do
                bindings: [input: 1],
                env: %{
                  file:
-                   "/Users/kevinjohnson/projects/ex_debugger/test/support/discovered_bugs/discrepancy_dd_2_3.ex",
+                   "/Users/ajwah/projects/ex_debugger/test/support/discovered_bugs/discrepancy_dd_2_3.ex",
                  function: "&dd_3_case_1/1",
                  line: 9,
                  module: Support.DiscoveredBugs.Discrepancy_dd_2_3
@@ -71,7 +71,7 @@ defmodule DiscoveredBugsTests.Various do
                bindings: [input: 1],
                env: %{
                  file:
-                   "/Users/kevinjohnson/projects/ex_debugger/test/support/discovered_bugs/discrepancy_dd_2_3.ex",
+                   "/Users/ajwah/projects/ex_debugger/test/support/discovered_bugs/discrepancy_dd_2_3.ex",
                  function: "&dd_2_case/1",
                  line: 5,
                  module: Support.DiscoveredBugs.Discrepancy_dd_2_3
